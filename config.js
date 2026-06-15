@@ -1,2 +1,2 @@
-// ERSA Personel Paneli — dağıtım sonrası /exec adresinizi buraya yapıştırın
-window.API_URL = "BURAYA_PERSONEL_WEB_APP_EXEC_ADRESI";
+// ERSA Personel Paneli
+window.API_URL = "https://script.google.com/macros/s/AKfycbxVGRFz6wx_sDcIuVYRGabdS3_7Ky8SeQKez9IfTd7vtsCzGcfn2ONAgtOi3XkqES9K/exec";
