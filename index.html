@@ -326,7 +326,7 @@ function sheetOvl(){
   if(S.sheet==="mail"){
     const x=S.sheetData||{};
     const opts=EMAIL_SABLON.map((t,i)=>'<option value="'+i+'">'+esc(t.ad)+'</option>').join('');
-    return '<div class="ovl" data-act="ovlclose"><div class="modal" data-stop="1"><div class="mh"><div class="t">Mail Gönder</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
+    return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">Mail Gönder</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
      +'<div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Alıcı: <b style="color:#fff;">'+esc(x.musteri||"")+'</b>'+(x.email?' · '+esc(x.email):' · <span style="color:#FF6B5E;">e-posta yok</span>')+'</div>'
      +'<label class="lbl">Hazır şablon</label><select id="ml_sab" class="sel" style="width:100%;" data-act="mailSablon">'+opts+'</select>'
      +'<label class="lbl" style="margin-top:10px;">Konu</label><input id="ml_konu" class="field" placeholder="E-posta konusu">'
@@ -337,7 +337,7 @@ function sheetOvl(){
   if(S.sheet==="takip"){
     const x=S.sheetData||{};
     const opts=TAKIP_DURUMLAR.map(o=>'<option>'+esc(o)+'</option>').join('');
-    return '<div class="ovl" data-act="ovlclose"><div class="modal" data-stop="1"><div class="mh"><div class="t">Tahsilat Takip</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
+    return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">Tahsilat Takip</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
      +'<div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Müşteri: <b style="color:#fff;">'+esc(x.musteri||"")+'</b></div>'
      +'<label class="lbl">Durum</label><select id="tk_durum" class="sel" style="width:100%;">'+opts+'</select>'
      +'<label class="lbl" style="margin-top:10px;">Söz verilen ödeme tarihi (varsa)</label><input id="tk_soz" class="field" type="date">'
@@ -347,18 +347,18 @@ function sheetOvl(){
   if(S.sheet==="bildirim"){
     const list=((S.data||{}).bildirim||[]);
     const rows=list.map(b=>'<div class="row" data-act="bildirimGit" data-tab="'+esc(b.tab)+'" style="cursor:pointer;"><div class="grow"><div style="font-weight:700;">'+esc(b.tip)+'</div><div style="font-size:11.5px;color:var(--muted);" class="nowrap">'+esc(b.musteri||"")+(b.ozet?" · "+esc(b.ozet):"")+'</div></div>'+ic('cl',16,'#666')+'</div>').join('')||'<div class="empty">Bekleyen yeni talep yok 🎉</div>';
-    return '<div class="ovl" data-act="ovlclose"><div class="modal" data-stop="1"><div class="mh"><div class="t">Bildirim Merkezi'+(list.length?' ('+list.length+')':'')+'</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div><div class="box">'+rows+'</div></div></div>';
+    return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">Bildirim Merkezi'+(list.length?' ('+list.length+')':'')+'</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div><div class="box">'+rows+'</div></div></div>';
   }
   if(S.sheet==="sifreYanit"){
     const x=S.sheetData||{};
-    return '<div class="ovl" data-act="ovlclose"><div class="modal" data-stop="1"><div class="mh"><div class="t">Makine Şifresi Ver</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
+    return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">Makine Şifresi Ver</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
      +'<div class="box" style="padding:12px;margin-bottom:12px;"><div style="font-weight:700;">'+esc(x.makine||"Makine")+'</div><div style="font-size:12px;color:var(--muted);margin-top:3px;">'+esc(x.musteri||"")+'</div></div>'
      +'<label class="lbl">Açılış Şifresi (müşteri bunu görecek)</label><input id="sf_txt" class="field" value="'+esc(x.sifre||"")+'" placeholder="Örn: 4729-AB">'
      +'<button class="btnred" data-act="sifreKaydet" data-row="'+x.row+'" style="margin-top:14px;" '+(S.busy?'disabled':'')+'>'+ic('key',16,'#fff')+' Şifreyi Gönder (Verildi)</button>'
      +'<button class="btn b-no" data-act="sifreReddet" data-row="'+x.row+'" style="width:100%;justify-content:center;padding:11px;margin-top:8px;">'+ic('x',14,'#FF6B5E')+' Reddet</button></div></div>';
   }
   if(S.sheet==="siparisEkle"){
-    return '<div class="ovl" data-act="ovlclose"><div class="modal" data-stop="1"><div class="mh"><div class="t">Yeni Sipariş</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
+    return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">Yeni Sipariş</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
      +'<label class="lbl">Müşteri</label><input id="sp_mus" class="field" placeholder="Müşteri adı (cariyle aynı)">'
      +'<label class="lbl">Makine</label><input id="sp_mak" class="field" placeholder="Makine / ürün">'
      +'<label class="lbl">Adet</label><input id="sp_adet" class="field" type="number" value="1">'
@@ -367,7 +367,7 @@ function sheetOvl(){
   }
   if(S.sheet==="teklifYanit"){
     const x=S.sheetData||{};
-    return '<div class="ovl" data-act="ovlclose"><div class="modal" data-stop="1"><div class="mh"><div class="t">Teklifi Yanıtla</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
+    return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">Teklifi Yanıtla</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
      +'<div class="box" style="padding:12px;margin-bottom:12px;"><div style="font-weight:700;">'+esc(x.urun||"Teklif")+'</div><div style="font-size:12px;color:var(--muted);margin-top:3px;">'+esc(x.musteri||"")+(x.adet?" · "+esc(x.adet)+" adet":"")+'</div>'+(x.aciklama?'<div style="font-size:12px;color:#cfcfcf;margin-top:6px;">'+esc(x.aciklama)+'</div>':'')+'</div>'
      +'<label class="lbl">Yanıt / Fiyat Teklifi (müşteri bunu görecek)</label><textarea id="ty_txt" class="field" style="min-height:120px;resize:vertical;" placeholder="Örn:\nBirim fiyat: $12.500 (FOB Shanghai)\nTeslim süresi: 45 gün\nGaranti: 2 yıl\nNot: ...">'+esc(x.yanit||"")+'</textarea>'
      +'<button class="btnred" data-act="teklifYanitKaydet" data-row="'+x.row+'" '+(S.busy?'disabled':'')+'>'+ic('send',16,'#fff')+' Yanıtı Gönder</button></div></div>';
@@ -375,7 +375,7 @@ function sheetOvl(){
   if(S.sheet!=="tahsilat") return "";
   const pre=S.sheetData||{};
   const today=new Date().toISOString().slice(0,10);
-  return '<div class="ovl" data-act="ovlclose"><div class="modal" data-stop="1"><div class="mh"><div class="t">Tahsilat Girişi</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
+  return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">Tahsilat Girişi</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
    +'<div style="font-size:11.5px;color:var(--muted);margin-bottom:12px;">"Ödemeler" sayfasına işlenir → cari bakiye düşer.</div>'
    +'<label class="lbl">Müşteri</label><input id="t_mus" class="field" value="'+esc(pre.musteri||"")+'" placeholder="Müşteri adı (cariyle aynı)">'
    +'<label class="lbl">Tutar ($)</label><input id="t_tut" class="field" type="number" inputmode="decimal" value="'+(pre.tutar||"")+'" placeholder="0">'
@@ -386,7 +386,7 @@ function sheetOvl(){
 }
 
 document.addEventListener("click",async e=>{
-  const tabEl=e.target.closest("[data-tab]"); if(tabEl){ S.tab=tabEl.getAttribute("data-tab"); S.ekstre=null; S.q=""; render(); return; }
+  const tabEl=e.target.closest("[data-tab]"); if(tabEl){ S.tab=tabEl.getAttribute("data-tab"); S.ekstre=null; S.q=""; S.sheet=null; S.sheetData=null; render(); return; }
   const el=e.target.closest("[data-act]"); if(!el) return;
   const a=el.getAttribute("data-act");
   if(a==="login"){login();return;}
@@ -415,7 +415,6 @@ document.addEventListener("click",async e=>{
   if(a==="spToggle"){const m=el.getAttribute("data-mus");S.spOpen=S.spOpen||{};S.spOpen[m]=!S.spOpen[m];render();return;}
   if(a==="tahsilat"){S.sheet="tahsilat";S.sheetData={};render();return;}
   if(a==="tahsilatPre"){S.sheet="tahsilat";S.sheetData={musteri:el.getAttribute("data-musteri"),tutar:el.getAttribute("data-tutar")};render();return;}
-  if(a==="ovlclose"){ if(e.target.closest('[data-stop]')) return; S.sheet=null;S.sheetData=null;render();return; }
   if(a==="sheetclose"){S.sheet=null;S.sheetData=null;render();return;}
   if(a==="tahsilatKaydet"){const data={musteri:$("t_mus").value,tutar:$("t_tut").value,tarih:$("t_tar").value,yontem:$("t_yon").value,aciklama:$("t_ack").value};if(!data.musteri||!(parseFloat(data.tutar)>0)){toast("Müşteri ve tutar gerekli");return;}S.sheet=null;S.sheetData=null;act("tahsilatGir",{data:data},"Tahsilat kaydedildi");return;}
 });
