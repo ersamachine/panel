@@ -292,8 +292,12 @@ function teklifView(){
 }
 function odemeView(){
   const d=S.data||{};
-  const rows=(d.odemeOnaylari||[]).map(b=>{const bek=b.durum==="Yeni";return '<div class="row"><div class="grow"><div style="font-weight:700;" class="nowrap">'+esc(b.musteri)+'</div><div style="font-size:11px;color:var(--muted);">'+esc(b.tarih||b.zaman)+' · '+esc(b.yontem)+(b.aciklama?' · '+esc(b.aciklama):'')+'</div></div><div class="mono" style="font-weight:700;">'+money(b.tutar,b.pb==="TL"?"₺":"$")+'</div>'+(bek?'<button class="btn b-on" data-act="odemeOnay" data-row="'+b._row+'" data-durum="Onaylandı">'+ic('check',12,'#5fd08a')+' Onayla</button><button class="btn b-no" data-act="odemeOnay" data-row="'+b._row+'" data-durum="Reddedildi">'+ic('x',12,'#FF6B5E')+' Reddet</button>':durumPill(b.durum))+'</div>';}).join('')||'<div class="empty">Ödeme bildirimi yok.</div>';
-  return '<div class="box">'+rows+'</div>';
+  const rows=(d.odemeOnaylari||[]).map(b=>{const bek=b.durum==="Yeni"; const isTL=(b.pb==="₺"||b.pb==="TL");
+    const tutarHTML = isTL
+      ? '<div style="text-align:right;"><div class="mono" style="font-weight:800;">'+money(b.tutar,"₺")+'</div>'+(b.usdKarsilik>0?'<div style="font-size:10.5px;color:#2ED573;">≈ $'+Math.round(b.usdKarsilik).toLocaleString("tr-TR")+'</div>':'')+(b.kur>0?'<div style="font-size:9.5px;color:var(--muted);">kur '+Number(b.kur).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2})+'</div>':'')+'</div>'
+      : '<div class="mono" style="font-weight:800;">'+money(b.tutar,"$")+'</div>';
+    return '<div class="row" style="flex-wrap:wrap;"><div class="grow" style="min-width:140px;"><div style="font-weight:700;" class="nowrap">'+esc(b.musteri)+'</div><div style="font-size:11px;color:var(--muted);">'+esc(b.tarih||b.zaman)+' · '+esc(b.yontem)+(b.aciklama?' · '+esc(b.aciklama):'')+'</div></div>'+tutarHTML+(bek?'<button class="btn b-on" data-act="odemeOnay" data-row="'+b._row+'" data-durum="Onaylandı">'+ic('check',12,'#5fd08a')+' Onayla</button><button class="btn b-no" data-act="odemeOnay" data-row="'+b._row+'" data-durum="Reddedildi">'+ic('x',12,'#FF6B5E')+' Reddet</button>':durumPill(b.durum))+'</div>';}).join('')||'<div class="empty">Ödeme bildirimi yok.</div>';
+  return '<div class="box">'+rows+'</div><div style="font-size:11.5px;color:var(--muted);margin-top:10px;">TL ödemelerde müşterinin uyguladığı kur ve $ karşılığı görünür. Onayladığında $ karşılığı bakiyeye işlenir.</div>';
 }
 function gecikenView(){
   const d=S.data||{};
