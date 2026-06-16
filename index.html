@@ -415,7 +415,8 @@ document.addEventListener("click",async e=>{
   if(a==="spToggle"){const m=el.getAttribute("data-mus");S.spOpen=S.spOpen||{};S.spOpen[m]=!S.spOpen[m];render();return;}
   if(a==="tahsilat"){S.sheet="tahsilat";S.sheetData={};render();return;}
   if(a==="tahsilatPre"){S.sheet="tahsilat";S.sheetData={musteri:el.getAttribute("data-musteri"),tutar:el.getAttribute("data-tutar")};render();return;}
-  if(a==="sheetclose"||a==="ovlclose"){S.sheet=null;S.sheetData=null;render();return;}
+  if(a==="ovlclose"){ if(e.target.closest('[data-stop]')) return; S.sheet=null;S.sheetData=null;render();return; }
+  if(a==="sheetclose"){S.sheet=null;S.sheetData=null;render();return;}
   if(a==="tahsilatKaydet"){const data={musteri:$("t_mus").value,tutar:$("t_tut").value,tarih:$("t_tar").value,yontem:$("t_yon").value,aciklama:$("t_ack").value};if(!data.musteri||!(parseFloat(data.tutar)>0)){toast("Müşteri ve tutar gerekli");return;}S.sheet=null;S.sheetData=null;act("tahsilatGir",{data:data},"Tahsilat kaydedildi");return;}
 });
 document.addEventListener("change",e=>{
