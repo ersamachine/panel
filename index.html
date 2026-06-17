@@ -301,8 +301,13 @@ function odemeView(){
 }
 function gecikenView(){
   const d=S.data||{};
-  const rows=(d.gecikenler||[]).map(g=>'<div class="row"><div class="grow"><div style="font-weight:700;" class="nowrap">'+esc(g.musteri)+'</div><div style="font-size:11px;color:var(--muted);">'+esc(g.taksit)+' · vade '+esc(g.vade)+'</div></div><div style="text-align:right;"><div class="mono" style="font-weight:800;color:#FF6B5E;">'+money(g.tutar)+'</div><span class="pill p-r">'+g.gun+' gün gecikti</span></div><button class="btn b-on" data-act="tahsilatPre" data-musteri="'+esc(g.musteri)+'" data-tutar="'+g.tutar+'">'+ic('cash',12,'#5fd08a')+' Tahsilat</button></div>').join('')||'<div class="empty">Geciken ödeme yok 👍</div>';
-  return '<div class="box">'+rows+'</div>';
+  const rows=(d.gecikenler||[]).map(g=>{
+    if(g.kaynak==="Bakiye"){
+      return '<div class="row"><div class="grow"><div style="font-weight:700;" class="nowrap">'+esc(g.musteri)+'</div><div style="font-size:11px;color:var(--muted);" class="nowrap">Bakiye · taksit dışı alacak'+(g.not?' · '+esc(g.not):'')+'</div></div><div style="text-align:right;"><div class="mono" style="font-weight:800;color:#FF6B5E;">'+money(g.tutar)+'</div><span class="pill p-b">Bakiye</span></div><button class="btn b-on" data-act="tahsilatPre" data-musteri="'+esc(g.musteri)+'" data-tutar="'+g.tutar+'">'+ic('cash',12,'#5fd08a')+' Tahsilat</button><button class="btn b-no" data-act="gecikenKaldir" data-row="'+g._row+'">'+ic('x',12,'#FF6B5E')+' Kaldır</button></div>';
+    }
+    return '<div class="row"><div class="grow"><div style="font-weight:700;" class="nowrap">'+esc(g.musteri)+'</div><div style="font-size:11px;color:var(--muted);">'+esc(g.taksit)+' · vade '+esc(g.vade)+'</div></div><div style="text-align:right;"><div class="mono" style="font-weight:800;color:#FF6B5E;">'+money(g.tutar)+'</div><span class="pill p-r">'+g.gun+' gün gecikti</span></div><button class="btn b-on" data-act="tahsilatPre" data-musteri="'+esc(g.musteri)+'" data-tutar="'+g.tutar+'">'+ic('cash',12,'#5fd08a')+' Tahsilat</button></div>';
+  }).join('')||'<div class="empty">Geciken ödeme yok 👍</div>';
+  return '<div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><button class="btn b-on" style="padding:9px 14px;" data-act="gecikenEkleAc">'+ic('plus',14,'#5fd08a')+' Bakiyeli müşteri ekle</button></div><div class="box">'+rows+'</div><div style="font-size:11.5px;color:var(--muted);margin-top:10px;">Taksiti olmayıp bakiyesi olan müşterileri elle ekleyebilirsin. Tutar canlı bakiyedir; tahsilat geldikçe azalır, sıfırlanınca düşer.</div>';
 }
 function istanbulView(){
   const d=S.data||{};
@@ -376,6 +381,17 @@ function sheetOvl(){
      +'<label class="lbl">Yanıt / Fiyat Teklifi (müşteri bunu görecek)</label><textarea id="ty_txt" class="field" style="min-height:120px;resize:vertical;" placeholder="Örn:\nBirim fiyat: $12.500 (FOB Shanghai)\nTeslim süresi: 45 gün\nGaranti: 2 yıl\nNot: ...">'+esc(x.yanit||"")+'</textarea>'
      +'<button class="btnred" data-act="teklifYanitKaydet" data-row="'+x.row+'" '+(S.busy?'disabled':'')+'>'+ic('send',16,'#fff')+' Yanıtı Gönder</button></div></div>';
   }
+  if(S.sheet==="gecikenEkle"){
+    const ms=((S.data||{}).musteriler||[]).filter(m=>m.bakiye>0);
+    const opts='<option value="">— Müşteri seç —</option>'+ms.map(m=>'<option value="'+esc(m.musteri)+'" data-bak="'+m.bakiye+'">'+esc(m.musteri)+' · bakiye '+money(m.bakiye)+'</option>').join('');
+    return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">Bakiyeli Müşteri Ekle</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
+     +'<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">Taksit planı olmayıp bakiyesi olan müşteriyi Geciken Ödemeler\'e ekle. Tutar otomatik güncel bakiyedir.</div>'
+     +'<label class="lbl">Müşteri</label><select id="gc_mus" class="field">'+opts+'</select>'
+     +'<div id="gc_bal" style="display:none;background:#11271A;border:1px solid #1d3a28;border-radius:10px;padding:11px 13px;margin-top:10px;font-size:12.5px;color:#9fe0bb;">Güncel bakiye: <b id="gc_balv" style="color:#2ED573;font-size:15px;"></b> · bu tutar listeye düşecek</div>'
+     +'<label class="lbl">Not (isteğe bağlı)</label><input id="gc_not" class="field" placeholder="Örn. sözlü anlaşma / açık hesap">'
+     +'<button class="btnred" data-act="gecikenKaydet" style="margin-top:16px;" '+(S.busy?'disabled':'')+'>'+ic('plus',16,'#fff')+' Geciken\'e Ekle</button>'
+     +'<div style="font-size:11px;color:var(--muted);margin-top:8px;">Sadece bakiyesi olan müşteriler listelenir. Eklenince Geciken Ödemeler\'de \"Bakiye\" etiketiyle görünür.</div></div></div>';
+  }
   if(S.sheet!=="tahsilat") return "";
   const pre=S.sheetData||{};
   const today=new Date().toISOString().slice(0,10);
@@ -419,11 +435,15 @@ document.addEventListener("click",async e=>{
   if(a==="spToggle"){const m=el.getAttribute("data-mus");S.spOpen=S.spOpen||{};S.spOpen[m]=!S.spOpen[m];render();return;}
   if(a==="tahsilat"){S.sheet="tahsilat";S.sheetData={};render();return;}
   if(a==="tahsilatPre"){S.sheet="tahsilat";S.sheetData={musteri:el.getAttribute("data-musteri"),tutar:el.getAttribute("data-tutar")};render();return;}
+  if(a==="gecikenEkleAc"){S.sheet="gecikenEkle";S.sheetData={};render();return;}
+  if(a==="gecikenKaydet"){const m=$("gc_mus").value;if(!m){toast("Müşteri seç");return;}const not=$("gc_not")?$("gc_not").value:"";S.sheet=null;S.sheetData=null;act("gecikenEkle",{data:{musteri:m,not:not}},"Geciken'e eklendi");return;}
+  if(a==="gecikenKaldir"){act("gecikenKaldir",{row:el.getAttribute("data-row")},"Kaldırıldı");return;}
   if(a==="sheetclose"){S.sheet=null;S.sheetData=null;render();return;}
   if(a==="tahsilatKaydet"){const data={musteri:$("t_mus").value,tutar:$("t_tut").value,tarih:$("t_tar").value,yontem:$("t_yon").value,aciklama:$("t_ack").value};if(!data.musteri||!(parseFloat(data.tutar)>0)){toast("Müşteri ve tutar gerekli");return;}S.sheet=null;S.sheetData=null;act("tahsilatGir",{data:data},"Tahsilat kaydedildi");return;}
 });
 document.addEventListener("change",e=>{
   const ms=e.target.closest('#ml_sab'); if(ms){ const t=EMAIL_SABLON[+ms.value]||{}; const k=$("ml_konu"),m=$("ml_msg"); if(k&&!k.value.trim())k.value=t.konu||""; if(k&&t.konu)k.value=t.konu; if(m)m.value=t.mesaj||""; return; }
+  const gc=e.target.closest('#gc_mus'); if(gc){ const o=gc.options[gc.selectedIndex]; const bak=o?o.getAttribute('data-bak'):''; const bx=$("gc_bal"),bv=$("gc_balv"); if(bx&&bv){ if(bak&&+bak>0){bv.textContent=money(+bak);bx.style.display="block";}else{bx.style.display="none";} } return; }
   const sel=e.target.closest('select[data-act="cekDurum"]'); if(sel){ act("cekDurum",{row:sel.getAttribute("data-row"),durum:sel.value},"Çek durumu güncellendi"); return; }
   const sp=e.target.closest('select[data-act="siparisDurum"]'); if(sp){ act("siparisDurum",{row:sp.getAttribute("data-row"),durum:sp.value},"Sipariş durumu güncellendi"); }
 });
