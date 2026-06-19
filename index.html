@@ -112,7 +112,7 @@ const $=id=>document.getElementById(id);
 const S={authed:false,kod:"",sifre:"",data:null,loading:false,tab:"ozet",ekstre:null,sheet:null,sheetData:null,busy:false,err:"",q:""};
 const money=(n,c)=>(c||"$")+Math.round(Number(n)||0).toLocaleString("tr-TR");
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[m]));
-const P={grid:"M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",wallet:"M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2H5a2 2 0 0 0-2 2zM3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM16 12.5h3v3h-3a1.5 1.5 0 0 1 0-3z",check:"M20 6 9 17l-5-5",receipt:"M5 3v18l2-1.5L9 21l2-1.5L13 21l2-1.5L17 21l2-1.5V3l-2 1.5L15 3l-2 1.5L11 3 9 4.5 7 3zM8 8h8M8 12h8",cash:"M2 6h20v12H2zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6M6 9v.01M18 15v.01",minus:"M5 12h14",users:"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",clock:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 7v5l3.5 2",logout:"M16 17l5-5-5-5M21 12H9M12 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6",x:"M18 6 6 18M6 6l12 12",wrench:"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z",alert:"M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z",plus:"M12 5v14M5 12h14",cal:"M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3H4zM4 9h16v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM8 3v3M16 3v3",doc:"M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6",refresh:"M21 12a9 9 0 1 1-2.6-6.3M21 4v5h-5",cl:"m15 6-6 6 6 6",phone:"M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.1a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z",bank:"M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3",chart:"M3 3v18h18M7 15l4-5 3 3 5-7",tag:"M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82zM7 7h.01",send:"M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z",key:"M14 7a4 4 0 1 0-3.9 5L9 13l-2 2 1.5 1.5L7 18l2 2 4.1-4.1A4 4 0 0 0 14 7zM15.5 6.5h.01",pkg:"M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8",ext:"M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6",bell:"M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0",search:"M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3",trend:"M23 6l-9.5 9.5-5-5L1 18M17 6h6v6",fire:"M12 2C8 6 6 9 6 13a6 6 0 0 0 12 0c0-2-1-4-3-6 0 2-1 3-2 3 1-3-1-6-1-8z",moon:"M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z",sun:"M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4",dl:"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3",sla:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 7v5l3 2",star:"M12 2l2.4 6.5L21 11l-6.6 2.5L12 20l-2.4-6.5L3 11l6.6-2.5z",monitor:"M3 4h18v12H3zM8 20h8M12 16v4",gift:"M20 12v9H4v-9M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7",trash:"M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6",mega:"M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM15 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"};
+const P={grid:"M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",wallet:"M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2H5a2 2 0 0 0-2 2zM3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM16 12.5h3v3h-3a1.5 1.5 0 0 1 0-3z",check:"M20 6 9 17l-5-5",receipt:"M5 3v18l2-1.5L9 21l2-1.5L13 21l2-1.5L17 21l2-1.5V3l-2 1.5L15 3l-2 1.5L11 3 9 4.5 7 3zM8 8h8M8 12h8",cash:"M2 6h20v12H2zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6M6 9v.01M18 15v.01",minus:"M5 12h14",users:"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",clock:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 7v5l3.5 2",logout:"M16 17l5-5-5-5M21 12H9M12 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6",x:"M18 6 6 18M6 6l12 12",wrench:"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z",alert:"M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z",plus:"M12 5v14M5 12h14",cal:"M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3H4zM4 9h16v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM8 3v3M16 3v3",doc:"M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6",refresh:"M21 12a9 9 0 1 1-2.6-6.3M21 4v5h-5",cl:"m15 6-6 6 6 6",phone:"M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.1a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z",bank:"M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3",chart:"M3 3v18h18M7 15l4-5 3 3 5-7",tag:"M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82zM7 7h.01",send:"M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z",key:"M14 7a4 4 0 1 0-3.9 5L9 13l-2 2 1.5 1.5L7 18l2 2 4.1-4.1A4 4 0 0 0 14 7zM15.5 6.5h.01",pkg:"M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8",ext:"M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6",bell:"M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0",search:"M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3",trend:"M23 6l-9.5 9.5-5-5L1 18M17 6h6v6",fire:"M12 2C8 6 6 9 6 13a6 6 0 0 0 12 0c0-2-1-4-3-6 0 2-1 3-2 3 1-3-1-6-1-8z",moon:"M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z",sun:"M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4",dl:"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3",sla:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 7v5l3 2",star:"M12 2l2.4 6.5L21 11l-6.6 2.5L12 20l-2.4-6.5L3 11l6.6-2.5z",monitor:"M3 4h18v12H3zM8 20h8M12 16v4",gift:"M20 12v9H4v-9M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7",trash:"M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6",mega:"M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM15 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14",store:"M3 9l1.5-5h15L21 9M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M4 9h16M9 20v-6h6v6"};
 function ic(n,s,c){const d=P[n];if(!d)return"";return '<i class="ic"><svg width="'+(s||16)+'" height="'+(s||16)+'" viewBox="0 0 24 24" fill="none" stroke="'+(c||'#6E6B7B')+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+d.split('M').filter(Boolean).map(p=>'<path d="M'+p+'"/>').join('')+'</svg></i>';}
 function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600);}
 function initials(s){s=String(s||"").trim();if(!s)return"P";const p=s.split(/\s+/);return (p[0][0]+(p[1]?p[1][0]:"")).toUpperCase();}
@@ -142,8 +142,8 @@ const EMAIL_SABLON=[
  {ad:"Sipariş bilgisi",konu:"ERSA MACHINERY · Sipariş Bilgilendirme",mesaj:"Merhaba,\n\nSiparişinizin güncel durumunu portalınızdaki “Siparişlerim” bölümünden adım adım takip edebilirsiniz. Sorularınız için bize ulaşabilirsiniz.\n\nSaygılarımızla."},
  {ad:"Genel bilgilendirme",konu:"ERSA MACHINERY · Bilgilendirme",mesaj:"Merhaba,\n\n"}
 ];
-const TABS=[["ozet","Özet","grid"],["trend","Tahsilat Trendi","trend"],["takip","Takip Listesi","phone"],["geciken","Geciken Ödemeler","alert"],["musteriler","Müşteriler & Bakiye","users"],["risk","Top Borçlular & Risk","fire"],["plan","Nakit Akışı","chart"],["odeme","Ödeme Onayları","check"],["teklif","Teklifler","tag"],["sifre","Şifre Talepleri","key"],["siparis","Siparişler","pkg"],["cek","Çek Takvimi","bank"],["servis","Servis (SLA)","wrench"],["istanbul","İstanbul Şube","doc"],["duyuru","Duyurular","mega"]];
-const NAVGROUPS=[["DASHBOARD",["ozet","trend"]],["TAHSİLAT",["takip","geciken","musteriler","risk","plan"]],["OPERASYON",["odeme","teklif","sifre","siparis","cek","servis"]],["PORTAL",["duyuru"]],["ŞUBE",["istanbul"]]];
+const TABS=[["ozet","Özet","grid"],["trend","Tahsilat Trendi","trend"],["takip","Takip Listesi","phone"],["geciken","Geciken Ödemeler","alert"],["musteriler","Müşteriler & Bakiye","users"],["risk","Top Borçlular & Risk","fire"],["plan","Nakit Akışı","chart"],["odeme","Ödeme Onayları","check"],["teklif","Teklifler","tag"],["sifre","Şifre Talepleri","key"],["siparis","Siparişler","pkg"],["cek","Çek Takvimi","bank"],["servis","Servis (SLA)","wrench"],["istanbul","İstanbul Şube","doc"],["duyuru","Duyurular","mega"],["kent","KENT Ticaret","store"]];
+const NAVGROUPS=[["DASHBOARD",["ozet","trend"]],["TAHSİLAT",["takip","geciken","musteriler","risk","plan"]],["OPERASYON",["odeme","teklif","sifre","siparis","cek","servis"]],["PORTAL",["duyuru"]],["ŞUBE",["istanbul","kent"]]];
 const TITLE={ozet:["Özet","Tüm operasyon tek bakışta"],trend:["Tahsilat Trendi","Haftalık & aylık tahsilat performansı"],takip:["Takip Listesi","Bugün aranacaklar — gecikmeye göre sıralı"],risk:["Top Borçlular & Risk","Risk segmentasyonu ve en yüksek bakiyeler"],plan:["Nakit Akışı","Önümüzdeki 30 / 60 / 90 günde tahsil edilecek alacaklar"],musteriler:["Müşteriler & Bakiye","Cari bakiyeler · tek tıkla müşteri uygulamasını aç"],odeme:["Ödeme Onayları","Portaldan gelen ödeme bildirimleri"],teklif:["Teklifler","Müşteri fiyat teklifi talepleri — yanıtlayın"],sifre:["Şifre Talepleri","Makine açılış şifresi talepleri — şifreyi gönderin"],siparis:["Siparişler","Sipariş durumunu güncelleyin / yeni sipariş ekleyin"],geciken:["Geciken Ödemeler","Vadesi geçmiş taksitler"],istanbul:["İstanbul Şube","Ali'nin masraf & tahsilatları — onayınıza düşer"],cek:["Çekler","Çek portföyü ve vade takibi"],servis:["Servis Talepleri","Müşteri portalından gelen arızalar"]};
 function badgeOf(t){const o=(S.data&&S.data.ozet)||{};if(t==="takip"&&o.gecikenAdet)return[o.gecikenAdet,"#981224","#fff"];if(t==="odeme"&&o.bekleyenOnay)return[o.bekleyenOnay,"#E07B00","#111"];if(t==="teklif"&&o.bekleyenTeklif)return[o.bekleyenTeklif,"#E07B00","#111"];if(t==="sifre"&&o.bekleyenSifre)return[o.bekleyenSifre,"#E07B00","#111"];if(t==="geciken"&&o.gecikenAdet)return[o.gecikenAdet,"#981224","#fff"];if(t==="istanbul"&&o.istBekleyen)return[o.istBekleyen,"#E07B00","#111"];if(t==="servis"&&o.acikServis)return[o.acikServis,"#3B82F6","#fff"];if(t==="cek"&&o.yaklasanCek)return[o.yaklasanCek,"#3B82F6","#fff"];return null;}
 
@@ -205,6 +205,7 @@ function viewFor(){
     case "cek": return cekView();
     case "servis": return servisView();
     case "duyuru": return duyuruView();
+    case "kent": return kentView();
   } return "";
 }
 function kshort(n){ n=Math.round(Number(n)||0); if(Math.abs(n)>=1000) return "$"+(n/1000).toFixed(Math.abs(n)>=10000?0:1).replace(".",",")+"B"; return "$"+n; }
@@ -549,6 +550,48 @@ function duyuruView(){
  }).join('');
  return head+'<div class="box">'+rows+'</div>';
 }
+function kentView(){
+ const k=(S.data||{}).kent||{}; const o=k.ozet||{};
+ const E='<div class="empty">Kayıt yok</div>';
+ function ksec(icon,col,title,right){return '<div class="sec">'+ic(icon,14,col)+' '+title+(right?'<span style="margin-left:auto;text-transform:none;letter-spacing:0;font-weight:600;">'+right+'</span>':'')+'</div>';}
+ // KPI
+ const kpis='<div class="kpis">'
+  +kpic("KENT → ERSA BORCU",money(o.borc||0),"Alımlar "+money(o.toplamAlim||0)+" − ödenen "+money(o.onayliOdeme||0),"#EA5455","alert","#EA5455","rgba(234,84,85,.14)")
+  +kpic("BEKLEYEN ÖDEME ONAYI",money(o.bekleyenTutar||0),(o.bekleyenAdet||0)+" bildirim onay bekliyor","#E07B00","clock","#FF9F43","rgba(255,159,67,.14)")
+  +kpic("AÇIK SİPARİŞ",String(o.acikSiparis||0),"ERSA'ya verilen, teslim olmayan","#3B82F6","pkg","#3B82F6","rgba(59,130,246,.14)")
+  +kpic("KENT TOPLAM SATIŞ",money(o.kentSatis||0),(o.musteriAdet||0)+" müşteri · kendi cirosu","#7367F0","trend","#7367F0","rgba(115,103,240,.14)")
+ +'</div>';
+ // 1) Ersa'ya ödemeler
+ const ode=(k.ersaOdemeler||[]).map(p=>{
+  const durum=String(p.Durum||"Bildirildi"); const bek=(durum==="Bildirildi");
+  const right=bek
+   ?'<button class="btn b-on" data-act="kentOdemeDurum" data-row="'+p._row+'" data-durum="Onaylandı">'+ic('check',12,'#28C76F')+' Onayla</button><button class="btn b-no" data-act="kentOdemeDurum" data-row="'+p._row+'" data-durum="Reddedildi">'+ic('x',12,'#EA5455')+' Reddet</button>'
+   :'<select class="sel" data-act="kentOdemeDurum" data-row="'+p._row+'">'+["Bildirildi","Onaylandı","Reddedildi"].map(x=>'<option'+(x===durum?' selected':'')+'>'+x+'</option>').join('')+'</select>';
+  return '<div class="row"><div style="font-weight:800;color:var(--muted);width:30px;">#'+esc(p.ID)+'</div><div class="grow"><div style="font-weight:700;" class="nowrap">'+money(p.Tutar)+' <span style="color:var(--muted);font-weight:500;font-size:11px;">· '+esc(p.Yontem||"")+'</span></div><div style="font-size:11px;color:var(--muted);">'+esc(p.Tarih||"")+(p.Dekont?' · '+esc(p.Dekont):'')+'</div></div>'+right+'</div>';
+ }).join('')||E;
+ // 2) Ersa'dan alımlar
+ const alim=(k.ersaAlimlar||[]).map(a=>'<div class="row"><div class="grow"><div style="font-weight:700;" class="nowrap">'+esc(a.Aciklama||"")+'</div><div style="font-size:11px;color:var(--muted);">'+esc(a.Tarih||"")+'</div></div><div class="mono" style="font-weight:800;color:#EA5455;">'+money(a.Tutar)+'</div><div style="cursor:pointer;padding:6px;" data-act="kentAlimSil" data-row="'+a._row+'" title="Sil">'+ic('trash',15,'#EA5455')+'</div></div>').join('')||E;
+ // 3) Ersa'ya siparişler
+ const sip=(k.siparisler||[]).map(s=>{
+  const durum=String(s.Durum||"Bekliyor"); const cls=durum==="Teslim"?"p-g":durum==="Yolda"?"p-b":durum==="Üretimde"?"p-o":"p-m";
+  return '<div class="row"><div style="font-weight:800;color:var(--muted);width:30px;">#'+esc(s.ID)+'</div><div class="grow"><div style="font-weight:700;">'+esc(s.Adet)+' adet <span class="pill '+cls+'">'+esc(durum)+'</span></div><div style="font-size:11px;color:var(--muted);">Talep: '+esc(s.TalepTarihi||"")+' · İstenen: '+esc(s.IstenenTarih||"—")+(s.Not?' · '+esc(s.Not):'')+'</div></div><div style="display:flex;align-items:center;gap:6px;"><input class="sel" style="width:122px;" type="date" value="'+esc(s.ETA||"")+'" data-act="kentSiparisEta" data-row="'+s._row+'" data-durum="'+esc(durum)+'" title="ETA"><select class="sel" data-act="kentSiparisDurum" data-row="'+s._row+'">'+["Bekliyor","Üretimde","Yolda","Teslim"].map(x=>'<option'+(x===durum?' selected':'')+'>'+x+'</option>').join('')+'</select></div></div>';
+ }).join('')||E;
+ // 4) KENT müşteri hareketleri
+ const har=(k.hareketler||[]).slice().reverse().map(h=>{const sat=String(h.Tur)==="Satış";return '<div class="row"><div class="grow"><div style="font-weight:700;" class="nowrap">'+esc(h.Musteri||"")+' <span class="pill '+(sat?"p-b":"p-g")+'">'+esc(h.Tur||"")+'</span></div><div style="font-size:11px;color:var(--muted);" class="nowrap">'+esc(h.Tarih||"")+(h.FaturaNo?' · '+esc(h.FaturaNo):'')+(h.Aciklama?' · '+esc(h.Aciklama):'')+'</div></div><div class="mono" style="font-weight:800;color:'+(sat?"#7367F0":"#28C76F")+';">'+(sat?"":"−")+money(h.Tutar)+'</div><div style="cursor:pointer;padding:6px;" data-act="kentHareketSil" data-row="'+h._row+'" title="Sil">'+ic('trash',14,'#EA5455')+'</div></div>';}).join('')||E;
+ // 5) KENT müşterileri (bakiye = satış − tahsilat)
+ const mus=(k.musteriler||[]).map(m=>{const hs=(k.hareketler||[]).filter(h=>String(h.Musteri)===String(m.Sirket));const bak=hs.reduce((acc,h)=>acc+(String(h.Tur)==="Satış"?Number(h.Tutar||0):-Number(h.Tutar||0)),0);return '<div class="row"><div class="av" style="width:32px;height:32px;font-size:11px;">'+esc(String(m.Sirket||"").slice(0,2).toUpperCase())+'</div><div class="grow"><div style="font-weight:700;" class="nowrap">'+esc(m.Sirket||"")+'</div><div style="font-size:11px;color:var(--muted);">'+esc(m.Sehir||"")+(m.Telefon?' · '+esc(m.Telefon):'')+'</div></div><div style="text-align:right;"><div class="mono" style="font-weight:800;color:'+(bak>0?"#EA5455":"#28C76F")+';">'+money(bak)+'</div><div style="font-size:9.5px;color:var(--muted);">bakiye</div></div></div>';}).join('')||E;
+ return kpis
+  +ksec("send","#FF9F43","ERSA'ya Ödemeler","KENT Ersa Ödeme")
+  +'<div class="box">'+ode+'</div>'
+  +ksec("dl","#EA5455","ERSA'dan Alımlar",'<button class="btn b-on" data-act="kentAlimEkleAc">'+ic('plus',12,'#28C76F')+' Alım ekle</button>')
+  +'<div class="box">'+alim+'</div>'
+  +ksec("pkg","#3B82F6","ERSA'ya Siparişler","KENT Siparişler")
+  +'<div class="box">'+sip+'</div>'
+  +ksec("receipt","#7367F0","KENT Müşteri Hareketleri",'<button class="btn b-w" data-act="kentHareketEkleAc">'+ic('plus',12,'#3B82F6')+' Hareket ekle</button>')
+  +'<div class="box">'+har+'</div>'
+  +ksec("users","#28C76F","KENT Müşterileri",'<button class="btn b-on" data-act="kentMusteriEkleAc">'+ic('plus',12,'#28C76F')+' Müşteri ekle</button>')
+  +'<div class="box">'+mus+'</div>';
+}
 function duPick(el){
  const w=el.parentNode;
  Array.prototype.forEach.call(w.children,function(c){ c.style.borderColor='var(--line)'; const sv=c.querySelector('svg'); if(sv)sv.setAttribute('stroke','#8A8A8A'); });
@@ -653,6 +696,35 @@ function sheetOvl(){
      +'<label class="lbl" style="margin-top:10px;">İkon</label><div style="display:flex;flex-wrap:wrap;gap:8px;">'+chips+'</div><input type="hidden" id="du_ikon" value="'+esc(sel)+'">'
      +'<button class="btnred" data-act="duyuruKaydet" style="margin-top:16px;" '+(S.busy?'disabled':'')+'>'+ic('plus',16,'#fff')+' Duyuruyu Yayınla</button></div></div>';
   }
+  if(S.sheet==="kentAlimEkle"){
+    const today=new Date().toISOString().slice(0,10);
+    return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">KENT · ERSA\'dan Alım Ekle</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
+     +'<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">KENT\'in ERSA\'dan aldığı makine/parti. Borcu artırır.</div>'
+     +'<label class="lbl">Tarih</label><input id="ka_tar" class="field" type="date" value="'+today+'">'
+     +'<label class="lbl">Açıklama</label><input id="ka_ack" class="field" placeholder="Örn: 3 adet makine partisi">'
+     +'<label class="lbl">Tutar ($)</label><input id="ka_tut" class="field" type="number" inputmode="decimal" placeholder="0">'
+     +'<button class="btnred" data-act="kentAlimKaydet" '+(S.busy?'disabled':'')+'>'+ic('plus',16,'#fff')+' Alımı Ekle</button></div></div>';
+  }
+  if(S.sheet==="kentHareketEkle"){
+    const today=new Date().toISOString().slice(0,10);
+    const k=(S.data||{}).kent||{}; const dl=(k.musteriler||[]).map(m=>'<option value="'+esc(m.Sirket)+'">').join('');
+    return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">KENT · Müşteri Hareketi Ekle</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
+     +'<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">KENT\'in kendi müşterisine satış / ondan tahsilat.</div>'
+     +'<label class="lbl">Tarih</label><input id="kh_tar" class="field" type="date" value="'+today+'">'
+     +'<label class="lbl">Tür</label><select id="kh_tur" class="field"><option>Satış</option><option>Tahsilat</option></select>'
+     +'<label class="lbl">Müşteri</label><input id="kh_mus" class="field" list="kh_dl" placeholder="Müşteri adı"><datalist id="kh_dl">'+dl+'</datalist>'
+     +'<label class="lbl">Tutar ($)</label><input id="kh_tut" class="field" type="number" inputmode="decimal" placeholder="0">'
+     +'<label class="lbl">Fatura No (isteğe bağlı)</label><input id="kh_fno" class="field" placeholder="FİS...">'
+     +'<label class="lbl">Açıklama (isteğe bağlı)</label><input id="kh_ack" class="field" placeholder="not">'
+     +'<button class="btnred" data-act="kentHareketKaydet" '+(S.busy?'disabled':'')+'>'+ic('plus',16,'#fff')+' Hareketi Ekle</button></div></div>';
+  }
+  if(S.sheet==="kentMusteriEkle"){
+    return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">KENT · Yeni Müşteri</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
+     +'<label class="lbl">Şirket</label><input id="km_sir" class="field" placeholder="Şirket adı">'
+     +'<label class="lbl">Şehir</label><input id="km_seh" class="field" placeholder="Şehir">'
+     +'<label class="lbl">Telefon</label><input id="km_tel" class="field" placeholder="05..">'
+     +'<button class="btnred" data-act="kentMusteriKaydet" '+(S.busy?'disabled':'')+'>'+ic('plus',16,'#fff')+' Müşteriyi Ekle</button></div></div>';
+  }
   if(S.sheet!=="tahsilat") return "";
   const pre=S.sheetData||{};
   const today=new Date().toISOString().slice(0,10);
@@ -689,6 +761,15 @@ document.addEventListener("click",async e=>{
   if(a==="duyuruKaydet"){const metin=($("du_metin").value||"").trim();const ikon=($("du_ikon")&&$("du_ikon").value)||"star";if(!metin){toast("Duyuru metni yazın");return;}S.sheet=null;S.sheetData=null;act("duyuruEkle",{data:{metin:metin,ikon:ikon}},"Duyuru yayınlandı ✓");return;}
   if(a==="duyuruToggle"){const row=el.getAttribute("data-row");const aktif=el.getAttribute("data-aktif")==="1";act("duyuruDurum",{row:row,aktif:!aktif},aktif?"Gizlendi":"Yayınlandı");return;}
   if(a==="duyuruSil"){const row=el.getAttribute("data-row");if(!confirm("Bu duyuru silinsin mi?"))return;act("duyuruSil",{row:row},"Duyuru silindi");return;}
+  if(a==="kentOdemeDurum"){const row=el.getAttribute("data-row");const durum=el.getAttribute("data-durum");act("kentOdemeDurum",{row:row,durum:durum},"KENT ödeme: "+durum);return;}
+  if(a==="kentAlimSil"){const row=el.getAttribute("data-row");if(!confirm("Bu alım kaydı silinsin mi?"))return;act("kentAlimSil",{row:row},"Alım silindi");return;}
+  if(a==="kentHareketSil"){const row=el.getAttribute("data-row");if(!confirm("Bu hareket silinsin mi?"))return;act("kentHareketSil",{row:row},"Hareket silindi");return;}
+  if(a==="kentAlimEkleAc"){S.sheet="kentAlimEkle";S.sheetData={};render();return;}
+  if(a==="kentAlimKaydet"){const data={tarih:$("ka_tar").value,aciklama:$("ka_ack").value.trim(),tutar:$("ka_tut").value};if(!data.aciklama||!(+data.tutar>0)){toast("Açıklama ve tutar gerekli");return;}S.sheet=null;S.sheetData=null;act("kentAlimEkle",{data:data},"Alım eklendi");return;}
+  if(a==="kentHareketEkleAc"){S.sheet="kentHareketEkle";S.sheetData={};render();return;}
+  if(a==="kentHareketKaydet"){const data={tarih:$("kh_tar").value,tur:$("kh_tur").value,musteri:$("kh_mus").value.trim(),tutar:$("kh_tut").value,fno:$("kh_fno").value.trim(),ack:$("kh_ack").value.trim()};if(!data.musteri||!(+data.tutar>0)){toast("Müşteri ve tutar gerekli");return;}S.sheet=null;S.sheetData=null;act("kentHareketEkle",{data:data},"Hareket eklendi");return;}
+  if(a==="kentMusteriEkleAc"){S.sheet="kentMusteriEkle";S.sheetData={};render();return;}
+  if(a==="kentMusteriKaydet"){const data={sirket:$("km_sir").value.trim(),sehir:$("km_seh").value.trim(),tel:$("km_tel").value.trim()};if(!data.sirket){toast("Şirket adı gerekli");return;}S.sheet=null;S.sheetData=null;act("kentMusteriEkle",{data:data},"Müşteri eklendi");return;}
   if(a==="teklifYanitAc"){const i=+el.getAttribute("data-i");const t=((S.data||{}).teklifler||[])[i]||{};S.sheet="teklifYanit";S.sheetData={row:t._row,musteri:t.musteri,urun:t.urun,adet:t.adet,aciklama:t.aciklama,yanit:t.yanit};render();return;}
   if(a==="teklifYanitKaydet"){const txt=$("ty_txt").value.trim();if(!txt){toast("Yanıt yazın");return;}const row=el.getAttribute("data-row");S.sheet=null;S.sheetData=null;act("teklifYanitla",{row:row,yanit:txt},"Teklif yanıtlandı");return;}
   if(a==="sifreYanitAc"){const i=+el.getAttribute("data-i");const t=((S.data||{}).sifreler||[])[i]||{};S.sheet="sifreYanit";S.sheetData={row:t._row,musteri:t.musteri,makine:t.makine,sifre:t.sifre};render();return;}
@@ -720,7 +801,10 @@ document.addEventListener("change",e=>{
   const gc=e.target.closest('#gc_mus'); if(gc){ const o=gc.options[gc.selectedIndex]; const bak=o?o.getAttribute('data-bak'):''; const bx=$("gc_bal"),bv=$("gc_balv"); if(bx&&bv){ if(bak&&+bak>0){bv.textContent=money(+bak);bx.style.display="block";}else{bx.style.display="none";} } return; }
   const so=e.target.closest('select[data-act="musSort"]'); if(so){ S.musSort=so.value; const v=document.querySelector(".view"); if(v)v.innerHTML=musterilerView(); return; }
   const sel=e.target.closest('select[data-act="cekDurum"]'); if(sel){ act("cekDurum",{row:sel.getAttribute("data-row"),durum:sel.value},"Çek durumu güncellendi"); return; }
-  const sp=e.target.closest('select[data-act="siparisDurum"]'); if(sp){ act("siparisDurum",{row:sp.getAttribute("data-row"),durum:sp.value},"Sipariş durumu güncellendi"); }
+  const sp=e.target.closest('select[data-act="siparisDurum"]'); if(sp){ act("siparisDurum",{row:sp.getAttribute("data-row"),durum:sp.value},"Sipariş durumu güncellendi"); return; }
+  const ko=e.target.closest('select[data-act="kentOdemeDurum"]'); if(ko){ act("kentOdemeDurum",{row:ko.getAttribute("data-row"),durum:ko.value},"KENT ödeme güncellendi"); return; }
+  const ksd=e.target.closest('select[data-act="kentSiparisDurum"]'); if(ksd){ act("kentSiparisDurum",{row:ksd.getAttribute("data-row"),durum:ksd.value},"KENT sipariş güncellendi"); return; }
+  const ke=e.target.closest('input[data-act="kentSiparisEta"]'); if(ke){ act("kentSiparisDurum",{row:ke.getAttribute("data-row"),durum:ke.getAttribute("data-durum"),eta:ke.value},"ETA güncellendi"); return; }
 });
 document.addEventListener("input",e=>{
   const sp=e.target.closest('[data-spsearch]'); if(sp){ S.spq=sp.value; const v=document.querySelector(".view"); if(v){ v.innerHTML=siparisView(); const inp=v.querySelector('[data-spsearch]'); if(inp){inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length);} } return; }
