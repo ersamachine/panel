@@ -555,8 +555,12 @@ function kentView(){
  const E='<div class="empty">Kayıt yok</div>';
  function ksec(icon,col,title,right){return '<div class="sec">'+ic(icon,14,col)+' '+title+(right?'<span style="margin-left:auto;text-transform:none;letter-spacing:0;font-weight:600;">'+right+'</span>':'')+'</div>';}
  // KPI
+ const _borc=o.borc||0;
+ const borcKart=(_borc>=0)
+  ?kpic("KENT → ERSA BORCU",money(_borc),"Satışlar "+money(o.kentSatis||0)+" − ödenen "+money(o.onayliOdeme||0),"#EA5455","alert","#EA5455","rgba(234,84,85,.14)")
+  :kpic("KENT · FAZLA ÖDEME (AVANS)",money(-_borc),"Ödenen "+money(o.onayliOdeme||0)+" > satışlar "+money(o.kentSatis||0),"#28C76F","check","#28C76F","rgba(40,199,111,.14)");
  const kpis='<div class="kpis">'
-  +kpic("KENT → ERSA BORCU",money(o.borc||0),"Alımlar "+money(o.toplamAlim||0)+" − ödenen "+money(o.onayliOdeme||0),"#EA5455","alert","#EA5455","rgba(234,84,85,.14)")
+  +borcKart
   +kpic("BEKLEYEN ÖDEME ONAYI",money(o.bekleyenTutar||0),(o.bekleyenAdet||0)+" bildirim onay bekliyor","#E07B00","clock","#FF9F43","rgba(255,159,67,.14)")
   +kpic("AÇIK SİPARİŞ",String(o.acikSiparis||0),"ERSA'ya verilen, teslim olmayan","#3B82F6","pkg","#3B82F6","rgba(59,130,246,.14)")
   +kpic("KENT TOPLAM SATIŞ",money(o.kentSatis||0),(o.musteriAdet||0)+" müşteri · kendi cirosu","#7367F0","trend","#7367F0","rgba(115,103,240,.14)")
