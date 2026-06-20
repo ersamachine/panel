@@ -521,7 +521,6 @@ function printEkstre(tk){
   const doc='<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cari Ekstre · '+esc(e.musteri)+'</title>'
    +'<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">'
    +'<style>'+EKSTRE_CSS+'</style></head><body>'
-   +'<div class="bar"><button onclick="window.print()">⬇ PDF olarak kaydet</button><span>Açılan pencerede “Hedef”i <b>PDF olarak kaydet</b> seçin.</span></div>'
    +'<div class="page">'
      +'<div class="lh"><div class="band"><div class="logo"><span class="wm">ersa machinery</span><span class="est">ESTD 2021</span></div></div><div class="title">CARİ HESAP<br>EKSTRESİ</div><div class="tab"></div></div>'
      +'<div class="accent"></div>'
@@ -537,11 +536,14 @@ function printEkstre(tk){
      +'</div>'
      +'<div class="botbar"><div>info@ersamachinery.com</div><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.4 12 4l9 7.4"/><path d="M5.5 9.8V20h13V9.8"/></svg><div>www.ersamachinery.com</div></div>'
    +'</div>'
-   +'<scr'+'ipt>window.onload=function(){setTimeout(function(){try{window.focus();window.print();}catch(_){}}, 500);};</scr'+'ipt>'
+   +'<scr'+'ipt src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js"></scr'+'ipt>'
+   +'<scr'+'ipt>var FN='+JSON.stringify("Cari-Ekstre-"+String(e.musteri||"Musteri").replace(/[^\wÀ-ſ -]/g,"").trim()+".pdf")+';'
+     +'function fitp(){var p=document.querySelector(".page");if(!p)return;p.style.zoom=1;var pw=p.offsetWidth,vw=document.documentElement.clientWidth;p.style.zoom=Math.min(1,vw/pw);}'
+     +'window.addEventListener("resize",fitp);window.addEventListener("load",fitp);setTimeout(fitp,250);setTimeout(fitp,1200);'
+     +'function indirPDF(){if(typeof html2pdf==="undefined"){alert("PDF hazırlanıyor, birkaç saniye sonra tekrar deneyin.");return;}var p=document.querySelector(".page");var z=p.style.zoom;p.style.zoom=1;html2pdf().set({margin:0,filename:FN,image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff"},jsPDF:{unit:"mm",format:"letter",orientation:"portrait"}}).from(p).save().then(function(){p.style.zoom=z;}).catch(function(){p.style.zoom=z;});}'
+   +'</scr'+'ipt>'
    +'</body></html>';
-  const w=window.open("","_blank");
-  if(!w){ toast("Açılır pencereye izin verin (popup engellendi)"); return; }
-  w.document.open(); w.document.write(doc); w.document.close();
+  S.sheet="pdfview"; S.sheetData={doc:doc, ad:e.musteri}; render();
 }
 function duyuruView(){
  const list=((S.data||{}).duyurular||[]);
@@ -759,6 +761,17 @@ function sheetOvl(){
      +'<label class="lbl">Telefon</label><input id="km_tel" class="field" placeholder="05..">'
      +'<button class="btnred" data-act="kentMusteriKaydet" '+(S.busy?'disabled':'')+'>'+ic('plus',16,'#fff')+' Müşteriyi Ekle</button></div></div>';
   }
+  if(S.sheet==="pdfview"){
+    const x=S.sheetData||{};
+    return '<div class="ovl" style="z-index:300;align-items:stretch;justify-content:flex-start;flex-direction:column;padding:0;background:rgba(10,10,12,.72);">'
+     +'<div style="display:flex;align-items:center;gap:10px;background:#1b1b1b;color:#fff;padding:10px 14px;flex-shrink:0;">'
+       +'<button class="btn" data-act="sheetclose" style="background:#2a2a2a;color:#fff;border-color:#3a3a3a;padding:9px 13px;">'+ic('cl',15,'#fff')+' Geri</button>'
+       +'<div style="flex:1;min-width:0;font-weight:700;font-size:13.5px;" class="nowrap">Cari Ekstre · '+esc(x.ad||"")+'</div>'
+       +'<button class="btnred" data-act="pdfIndir" style="width:auto;margin:0;padding:9px 15px;">'+ic('dl',15,'#fff')+' İndir (PDF)</button>'
+     +'</div>'
+     +'<iframe id="pdfframe" srcdoc="'+esc(x.doc||"")+'" style="flex:1;width:100%;border:none;background:#54585e;display:block;"></iframe>'
+     +'</div>';
+  }
   if(S.sheet==="foto"){
     const x=S.sheetData||{}; const id=driveId(x.url);
     const big=id?('https://drive.google.com/thumbnail?id='+id+'&sz=w1600'):x.url;
@@ -852,6 +865,7 @@ document.addEventListener("click",async e=>{
   if(a==="ekstrePdfAc"){ if(!S.ekstre||!S.ekstre.musteri){toast("Önce müşteriyi açın");return;} if(S.ekstreTk===undefined)S.ekstreTk=true; S.sheet="ekstrePdf"; render(); return; }
   if(a==="ekstreTkToggle"){ S.ekstreTk=(S.ekstreTk===false); render(); return; }
   if(a==="ekstrePdfYap"){ const tk=S.ekstreTk!==false; S.sheet=null; render(); printEkstre(tk); return; }
+  if(a==="pdfIndir"){ const f=document.getElementById("pdfframe"); try{ if(f&&f.contentWindow&&f.contentWindow.indirPDF){ f.contentWindow.indirPDF(); } else { toast("PDF hazır değil, birkaç saniye bekleyip tekrar deneyin"); } }catch(_){ toast("İndirme başlatılamadı"); } return; }
   if(a==="gecikenKaldir"){act("gecikenKaldir",{row:el.getAttribute("data-row")},"Kaldırıldı");return;}
   if(a==="sheetclose"){S.sheet=null;S.sheetData=null;render();return;}
   if(a==="tahsilatKaydet"){const data={musteri:$("t_mus").value,tutar:$("t_tut").value,tarih:$("t_tar").value,yontem:$("t_yon").value,aciklama:$("t_ack").value};if(!data.musteri||!(parseFloat(data.tutar)>0)){toast("Müşteri ve tutar gerekli");return;}S.sheet=null;S.sheetData=null;act("tahsilatGir",{data:data},"Tahsilat kaydedildi");return;}
