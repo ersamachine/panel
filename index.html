@@ -662,9 +662,9 @@ function sheetOvl(){
     return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">Bildirim Merkezi'+(list.length?' ('+list.length+')':'')+'</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div><div class="box">'+rows+'</div></div></div>';
   }
   if(S.sheet==="sifreYanit"){
-    const x=S.sheetData||{};
+    const x=S.sheetData||{}; const fp=fotoParse(x.makine);
     return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">Makine Şifresi Ver</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
-     +'<div class="box" style="padding:12px;margin-bottom:12px;"><div style="font-weight:700;">'+esc(x.makine||"Makine")+'</div><div style="font-size:12px;color:var(--muted);margin-top:3px;">'+esc(x.musteri||"")+'</div></div>'
+     +'<div class="box" style="padding:12px;margin-bottom:12px;"><div style="font-weight:700;">'+esc(fp.clean||"Makine")+'</div><div style="font-size:12px;color:var(--muted);margin-top:3px;">'+esc(x.musteri||"")+'</div>'+fotoThumbs(fp.urls,fp.clean)+'</div>'
      +'<label class="lbl">Açılış Şifresi (müşteri bunu görecek)</label><input id="sf_txt" class="field" value="'+esc(x.sifre||"")+'" placeholder="Örn: 4729-AB">'
      +'<button class="btnred" data-act="sifreKaydet" data-row="'+x.row+'" style="margin-top:14px;" '+(S.busy?'disabled':'')+'>'+ic('key',16,'#fff')+' Şifreyi Gönder (Verildi)</button>'
      +'<button class="btn b-no" data-act="sifreReddet" data-row="'+x.row+'" style="width:100%;justify-content:center;padding:11px;margin-top:8px;">'+ic('x',14,'#EA5455')+' Reddet</button></div></div>';
@@ -846,7 +846,7 @@ document.addEventListener("click",async e=>{
   if(a==="teklifYanitAc"){const i=+el.getAttribute("data-i");const t=((S.data||{}).teklifler||[])[i]||{};S.sheet="teklifYanit";S.sheetData={row:t._row,musteri:t.musteri,urun:t.urun,adet:t.adet,aciklama:t.aciklama,yanit:t.yanit};render();return;}
   if(a==="teklifYanitKaydet"){const txt=$("ty_txt").value.trim();if(!txt){toast("Yanıt yazın");return;}const row=el.getAttribute("data-row");S.sheet=null;S.sheetData=null;act("teklifYanitla",{row:row,yanit:txt},"Teklif yanıtlandı");return;}
   if(a==="sifreYanitAc"){const i=+el.getAttribute("data-i");const t=((S.data||{}).sifreler||[])[i]||{};S.sheet="sifreYanit";S.sheetData={row:t._row,musteri:t.musteri,makine:t.makine,sifre:t.sifre};render();return;}
-  if(a==="sifreKaydet"){const txt=$("sf_txt").value.trim();if(!txt){toast("Şifre yazın");return;}const row=el.getAttribute("data-row");S.sheet=null;S.sheetData=null;act("sifreYanitla",{row:row,sifre:txt,durum:"Verildi"},"Şifre gönderildi");return;}
+  if(a==="sifreKaydet"){const txt=$("sf_txt").value;if(!txt.trim()){toast("Şifre yazın");return;}const row=el.getAttribute("data-row");S.sheet=null;S.sheetData=null;act("sifreYanitla",{row:row,msifre:txt,durum:"Verildi"},"Şifre gönderildi");return;}
   if(a==="sifreReddet"){const row=el.getAttribute("data-row");S.sheet=null;S.sheetData=null;act("sifreYanitla",{row:row,durum:"Reddedildi"},"Reddedildi");return;}
   if(a==="siparisEkleAc"){S.sheet="siparisEkle";S.sheetData={};render();return;}
   if(a==="siparisKaydet"){const data={musteri:$("sp_mus").value,makine:$("sp_mak").value,adet:$("sp_adet").value,not:$("sp_not").value};if(!data.musteri||!data.makine){toast("Müşteri ve makine gerekli");return;}S.sheet=null;S.sheetData=null;act("siparisEkle",{data:data},"Sipariş eklendi");return;}
