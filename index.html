@@ -427,12 +427,11 @@ function istanbulView(){
 }
 function cekView(){
   const d=S.data||{};
-  const opts=["Portföyde","Tahsilde","Tahsil Edildi","Karşılıksız","İade","Ödendi"];
-  const rows=(d.cekler||[]).map(c=>{const g=c.gun; const gec=(g!==null&&g<0); const yak=(g!==null&&g>=0&&g<=7);
-    const vadeTxt=c.vade?(esc(c.vade)+(gec?' · '+Math.abs(g)+' gün geçti':(yak?' · '+g+' gün kaldı':''))):'-';
-    const sel='<select class="sel" data-act="cekDurum" data-row="'+c._row+'">'+opts.map(o=>'<option'+(o===c.durum?' selected':'')+'>'+o+'</option>').join('')+'</select>';
-    return '<div class="row"><div class="grow"><div style="font-weight:700;" class="nowrap">'+esc(c.musteri)+' <span style="color:var(--muted);font-weight:500;">'+(c.cekNo?'· '+esc(c.cekNo):'')+'</span></div><div style="font-size:11px;color:'+(gec?'#EA5455':(yak?'#E07B00':'var(--muted)'))+';">vade '+vadeTxt+(c.yer?' · '+esc(c.yer):'')+'</div></div><div class="mono" style="font-weight:700;">'+money(c.usd)+'</div>'+sel+'</div>';}).join('')||'<div class="empty">Çek kaydı yok.</div>';
-  return cekCalendar()+'<div class="sec">'+ic('bank',13)+'ÇEK LİSTESİ · durum güncelle</div><div class="box">'+rows+'</div>';
+  const rows=(d.cekler||[]).map((c,i)=>{const g=c.gun; const gec=(g!==null&&g<0); const yak=(g!==null&&g>=0&&g<=7); const cikis=(c.durum==="Çıkış Yapıldı"); const fp=fotoParse(c.foto);
+    const vadeTxt=c.vade?(esc(c.vade)+(gec?' · '+Math.abs(g)+'g geçti':(yak?' · '+g+'g kaldı':''))):'-';
+    const yerLine=cikis?('<span style="color:#3B82F6;font-weight:700;">→ '+esc(c.yer||"—")+' · verildi'+(c.verilis?' '+esc(c.verilis):'')+'</span>'):(c.yer?esc(c.yer):'');
+    return '<div class="row"><div style="width:36px;height:36px;border-radius:9px;background:rgba(59,130,246,.12);display:flex;align-items:center;justify-content:center;flex:0 0 auto;">'+ic('bank',17,'#3B82F6')+'</div><div class="grow" style="min-width:0;"><div style="font-weight:700;" class="nowrap">'+esc(c.musteri)+' <span style="color:var(--muted);font-weight:500;font-size:11.5px;">'+(c.cekNo?'· '+esc(c.cekNo):'')+'</span></div><div style="font-size:11px;color:'+(gec?'#EA5455':(yak?'#E07B00':'var(--muted)'))+';">vade '+vadeTxt+(yerLine?' · '+yerLine:'')+'</div>'+fotoThumbs(fp.urls,c.cekNo)+'</div><div class="mono" style="font-weight:800;flex:0 0 auto;">'+money(c.cekTL,"₺")+'</div>'+durumPill(c.durum)+'<button class="btn b-w" style="flex:0 0 auto;" data-act="cekDetayAc" data-i="'+i+'">'+ic('edit',13,'#3B82F6')+' Detay / Çıkış</button></div>';}).join('')||'<div class="empty">Çek kaydı yok.</div>';
+  return cekCalendar()+'<div class="sec">'+ic('bank',13)+'ÇEK LİSTESİ · durum / çıkış / foto</div><div class="box">'+rows+'</div>';
 }
 function servisView(){
   const d=S.data||{}; const list=(d.servisler||[]);
@@ -666,6 +665,18 @@ function duPick(el){
  el.style.borderColor='#981224'; const sv=el.querySelector('svg'); if(sv)sv.setAttribute('stroke','#981224');
  const h=document.getElementById('du_ikon'); if(h)h.value=el.getAttribute('data-ik');
 }
+window.cekPhotos=[];
+window.pickCekFoto=function(e){
+ const strip=document.getElementById('ck_strip'); if(!strip)return; const addlbl=strip.querySelector('label');
+ Array.prototype.forEach.call(e.target.files,function(f){ if(window.cekPhotos.length>=4)return;
+   const rd=new FileReader(); rd.onload=function(){ const img=new Image(); img.onload=function(){
+     let max=1300,w=img.width,hh=img.height; if(w>max||hh>max){ if(w>=hh){hh=Math.round(hh*max/w);w=max;}else{w=Math.round(w*max/hh);hh=max;} }
+     const cv=document.createElement('canvas'); cv.width=w; cv.height=hh; cv.getContext('2d').drawImage(img,0,0,w,hh);
+     const data=cv.toDataURL('image/jpeg',0.7); window.cekPhotos.push(data);
+     const t=document.createElement('div'); t.style.cssText='width:64px;height:64px;border-radius:11px;border:1px solid var(--line);background-size:cover;background-position:center;background-image:url('+data+')'; strip.insertBefore(t,addlbl);
+   }; img.src=rd.result; }; rd.readAsDataURL(f);
+ }); e.target.value='';
+};
 function sheetOvl(){
   if(S.sheet==="mail"){
     const x=S.sheetData||{};
@@ -804,6 +815,20 @@ function sheetOvl(){
      +'<iframe id="pdfframe" srcdoc="'+esc(x.doc||"")+'" style="flex:1;width:100%;border:none;background:#54585e;display:block;"></iframe>'
      +'</div>';
   }
+  if(S.sheet==="cekDetay"){
+    const x=S.sheetData||{}; const fp=fotoParse(x.foto);
+    const opts=["Portföyde","Tahsilde","Tahsil Edildi","Çıkış Yapıldı","Karşılıksız","İade","Ödendi"];
+    const today=new Date().toISOString().slice(0,10); const verisVal=x.verilis||today;
+    return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">Çek Detayı / Çıkışı</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
+     +'<div class="box" style="padding:12px 14px;margin-bottom:12px;"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;"><div style="min-width:0;"><div style="font-weight:700;color:var(--head);" class="nowrap">'+esc(x.musteri||"")+'</div><div style="font-size:11.5px;color:var(--muted);">'+esc(x.cekNo||"")+(x.vade?' · Vade '+esc(x.vade):'')+'</div></div><div class="mono" style="font-weight:800;font-size:17px;color:var(--head);flex:0 0 auto;">'+money(x.cekTL,"₺")+'</div></div></div>'
+     +'<label class="lbl">Durum</label><select id="ck_durum" class="field">'+opts.map(o=>'<option'+(o===x.durum?' selected':'')+'>'+o+'</option>').join('')+'</select>'
+     +'<label class="lbl">Nereye verildi? (çıkış yapıldıysa firma / kişi)</label><input id="ck_yer" class="field" value="'+esc(x.yer||"")+'" placeholder="Örn: ABC Tedarik San. Ltd.">'
+     +'<label class="lbl">Veriliş tarihi</label><input id="ck_veris" class="field" type="date" value="'+esc(verisVal)+'">'
+     +'<label class="lbl">Çek Fotoğrafı (ön / arka)</label>'
+     +(fp.urls.length?'<div style="margin-bottom:8px;">'+fotoThumbs(fp.urls,x.cekNo)+'</div>':'')
+     +'<div id="ck_strip" style="display:flex;gap:8px;flex-wrap:wrap;"><label for="ck_file" style="width:64px;height:64px;border:1.5px dashed var(--line);border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);cursor:pointer;">'+ic('plus',18,'#8A8A8A')+'<span style="font-size:8.5px;">Ekle</span></label></div><input id="ck_file" type="file" accept="image/*" multiple style="display:none;" onchange="pickCekFoto(event)">'
+     +'<button class="btnred" data-act="cekKaydet" data-row="'+x._row+'" style="margin-top:16px;" '+(S.busy?'disabled':'')+'>'+ic('check',16,'#fff')+' Kaydet</button></div></div>';
+  }
   if(S.sheet==="foto"){
     const x=S.sheetData||{}; const id=driveId(x.url);
     const big=id?('https://drive.google.com/thumbnail?id='+id+'&sz=w1600'):x.url;
@@ -875,6 +900,8 @@ document.addEventListener("click",async e=>{
   if(a==="stokDuzenleKaydet"){const row=el.getAttribute("data-row");const data={tarih:$("sk_tar").value,ad:$("sk_ad").value.trim(),adet:$("sk_adet").value,fiyat:$("sk_fiyat").value};if(!data.ad||!(+data.adet>0)||!(+data.fiyat>0)){toast("Ad, adet ve birim fiyat gerekli");return;}S.sheet=null;S.sheetData=null;act("stokGuncelle",{row:row,data:data},"Stok güncellendi");return;}
   if(a==="stokSil"){const row=el.getAttribute("data-row");if(!confirm("Bu stok kaydı silinsin mi?"))return;act("stokSil",{row:row},"Stok silindi");return;}
   if(a==="fotoBuyut"){S.sheet="foto";S.sheetData={url:el.getAttribute("data-url"),title:el.getAttribute("data-title")};render();return;}
+  if(a==="cekDetayAc"){const i=+el.getAttribute("data-i");const c=((S.data||{}).cekler||[])[i]||{};window.cekPhotos=[];S.sheet="cekDetay";S.sheetData=c;render();return;}
+  if(a==="cekKaydet"){const row=el.getAttribute("data-row");const durum=$("ck_durum").value;const yer=$("ck_yer").value.trim();const verilis=$("ck_veris").value;if(durum==="Çıkış Yapıldı"&&!yer){toast("Çıkış için 'nereye verildi' yazın");return;}S.sheet=null;S.sheetData=null;act("cekGuncelle",{row:row,durum:durum,yer:yer,verilis:verilis,photos:(window.cekPhotos||[]).slice()},"Çek güncellendi");window.cekPhotos=[];return;}
   if(a==="teklifYanitAc"){const i=+el.getAttribute("data-i");const t=((S.data||{}).teklifler||[])[i]||{};S.sheet="teklifYanit";S.sheetData={row:t._row,musteri:t.musteri,urun:t.urun,adet:t.adet,aciklama:t.aciklama,yanit:t.yanit};render();return;}
   if(a==="teklifYanitKaydet"){const txt=$("ty_txt").value.trim();if(!txt){toast("Yanıt yazın");return;}const row=el.getAttribute("data-row");S.sheet=null;S.sheetData=null;act("teklifYanitla",{row:row,yanit:txt},"Teklif yanıtlandı");return;}
   if(a==="sifreYanitAc"){const i=+el.getAttribute("data-i");const t=((S.data||{}).sifreler||[])[i]||{};S.sheet="sifreYanit";S.sheetData={row:t._row,musteri:t.musteri,makine:t.makine,sifre:t.sifre};render();return;}
