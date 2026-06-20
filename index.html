@@ -354,6 +354,9 @@ function ekstreView(){
   const ilt=(e.iletisim||[]).map(x=>'<div class="row"><div class="grow"><div style="font-weight:700;">'+esc(x.tur||"Not")+' <span style="color:var(--muted);font-weight:500;">· '+esc(x.zaman)+(x.personel?" · "+esc(x.personel):"")+'</span></div><div style="font-size:11.5px;color:#cfcfcf;margin-top:2px;">'+esc(x.konu||"")+(x.detay?" — "+esc(x.detay):"")+'</div></div></div>').join('')||'<div class="empty">Henüz iletişim kaydı yok.</div>';
   const tkp=(e.takip||[]).map(x=>'<div class="row"><div class="grow"><div style="font-weight:700;">'+esc(x.durum||"")+(x.sozTarihi?' <span style="color:#E07B00;font-weight:600;">· söz: '+esc(x.sozTarihi)+'</span>':'')+'</div><div style="font-size:11px;color:var(--muted);">'+esc(x.zaman)+(x.personel?" · "+esc(x.personel):"")+'</div>'+(x.not?'<div style="font-size:11.5px;color:#cfcfcf;margin-top:2px;">'+esc(x.not)+'</div>':'')+'</div></div>').join('')||'<div class="empty">Takip kaydı yok.</div>';
 
+  const portalSec=(e.pk||e.ps)
+   ? '<div class="sec">'+ic('key',13,'#3B82F6')+'PORTAL GİRİŞİ</div><div class="box" style="padding:14px 16px;"><div style="display:flex;gap:28px;flex-wrap:wrap;align-items:flex-end;"><div><div style="font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.5px;">MÜŞTERİ KODU</div><div class="mono" style="font-size:16px;font-weight:800;color:var(--head);margin-top:2px;">'+esc(e.pk||"—")+'</div></div><div><div style="font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.5px;">ŞİFRE</div><div class="mono" style="font-size:16px;font-weight:800;color:var(--head);margin-top:2px;">'+esc(e.ps||"—")+'</div></div></div><div style="display:flex;gap:8px;margin-top:13px;flex-wrap:wrap;">'+btn('data-act="portalSifreAc"','data-musteri="'+esc(m)+'" data-kod="'+esc(e.pk||"")+'" data-sifre="'+esc(e.ps||"")+'"','key','#E07B00','Şifre / Kod Değiştir')+(e.pk&&e.ps?btn('data-act="musteriAc"','data-k="'+esc(e.pk)+'" data-s="'+esc(e.ps)+'"','ext','#3B82F6','Uygulamayı Aç'):'')+'</div></div>'
+   : '<div class="sec">'+ic('key',13,'#3B82F6')+'PORTAL GİRİŞİ</div><div class="box" style="padding:14px 16px;"><div style="font-size:12.5px;color:var(--muted);margin-bottom:10px;">Bu müşteri için portal girişi tanımlı değil.</div>'+btn('data-act="portalSifreAc"','data-musteri="'+esc(m)+'" data-kod="" data-sifre=""','plus','#28C76F','Portal Girişi Oluştur')+'</div>';
   const kn=e.karne;
   return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;cursor:pointer;" data-act="ekstreBack">'+ic('cl',18,'#8A8A8A')+' <span style="color:var(--muted);font-weight:600;">Müşteriler</span></div>'
    +'<div class="box" style="padding:16px;margin-bottom:14px;"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><div style="font-size:17px;font-weight:800;">'+esc(m)+'</div>'+riskBadge(kn)+'</div>'
@@ -361,6 +364,7 @@ function ekstreView(){
    +(email?'<div style="font-size:11px;color:var(--muted);margin-top:8px;">'+esc(email)+(tel?' · '+esc(tel):'')+'</div>':(tel?'<div style="font-size:11px;color:var(--muted);margin-top:8px;">'+esc(tel)+'</div>':''))
    +acts+'</div>'
    +karneKart(e.karne)
+   +portalSec
    +'<div class="sec">TAHSİLAT TAKİP</div><div class="box">'+tkp+'</div>'
    +'<div class="sec">AÇIK TAKSİTLER</div><div class="box">'+tks+'</div>'
    +'<div class="sec">SİPARİŞLER</div><div class="box">'+sip+'</div>'
@@ -665,6 +669,7 @@ function duPick(el){
  el.style.borderColor='#981224'; const sv=el.querySelector('svg'); if(sv)sv.setAttribute('stroke','#981224');
  const h=document.getElementById('du_ikon'); if(h)h.value=el.getAttribute('data-ik');
 }
+window.ppUret=function(id,n){var c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";var s="";for(var i=0;i<n;i++)s+=c.charAt(Math.floor(Math.random()*c.length));var el=document.getElementById(id);if(el)el.value=s;};
 window.cekPhotos=[];
 window.pickCekFoto=function(e){
  const strip=document.getElementById('ck_strip'); if(!strip)return; const addlbl=strip.querySelector('label');
@@ -815,6 +820,15 @@ function sheetOvl(){
      +'<iframe id="pdfframe" srcdoc="'+esc(x.doc||"")+'" style="flex:1;width:100%;border:none;background:#54585e;display:block;"></iframe>'
      +'</div>';
   }
+  if(S.sheet==="portalSifre"){
+    const x=S.sheetData||{}; const yeni=!(x.kod);
+    return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">'+(yeni?"Portal Girişi Oluştur":"Portal Giriş Bilgileri")+'</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
+     +'<div style="font-size:12.5px;color:var(--muted);margin-bottom:12px;">'+esc(x.musteri||"")+' — müşterinin portal giriş bilgileri. Müşteri bu <b style="color:var(--head);">kod + şifre</b> ile giriş yapar.</div>'
+     +'<label class="lbl">Müşteri Kodu</label><div style="display:flex;gap:8px;"><input id="pp_kod" class="field" style="flex:1;margin:0;" value="'+esc(x.kod||"")+'" placeholder="Örn: A7K2QX"><button class="btn b-w" type="button" style="flex:0 0 auto;" onclick="ppUret(\'pp_kod\',6)">'+ic('refresh',13,'#3B82F6')+' Üret</button></div>'
+     +'<label class="lbl">Şifre</label><div style="display:flex;gap:8px;"><input id="pp_sifre" class="field" style="flex:1;margin:0;" value="'+esc(x.sifre||"")+'" placeholder="Örn: 8FH3KP2M"><button class="btn b-w" type="button" style="flex:0 0 auto;" onclick="ppUret(\'pp_sifre\',8)">'+ic('refresh',13,'#3B82F6')+' Üret</button></div>'
+     +'<div style="font-size:11px;color:var(--muted);margin-top:8px;">Değiştirince eski şifre geçersiz olur; müşteriye yeni bilgiyi iletmeyi unutmayın.</div>'
+     +'<button class="btnred" data-act="portalSifreKaydet" data-musteri="'+esc(x.musteri)+'" style="margin-top:14px;" '+(S.busy?'disabled':'')+'>'+ic('check',16,'#fff')+' Kaydet</button></div></div>';
+  }
   if(S.sheet==="cekDetay"){
     const x=S.sheetData||{}; const fp=fotoParse(x.foto);
     const opts=["Portföyde","Tahsilde","Tahsil Edildi","Çıkış Yapıldı","Karşılıksız","İade","Ödendi"];
@@ -900,6 +914,8 @@ document.addEventListener("click",async e=>{
   if(a==="stokDuzenleKaydet"){const row=el.getAttribute("data-row");const data={tarih:$("sk_tar").value,ad:$("sk_ad").value.trim(),adet:$("sk_adet").value,fiyat:$("sk_fiyat").value};if(!data.ad||!(+data.adet>0)||!(+data.fiyat>0)){toast("Ad, adet ve birim fiyat gerekli");return;}S.sheet=null;S.sheetData=null;act("stokGuncelle",{row:row,data:data},"Stok güncellendi");return;}
   if(a==="stokSil"){const row=el.getAttribute("data-row");if(!confirm("Bu stok kaydı silinsin mi?"))return;act("stokSil",{row:row},"Stok silindi");return;}
   if(a==="fotoBuyut"){S.sheet="foto";S.sheetData={url:el.getAttribute("data-url"),title:el.getAttribute("data-title")};render();return;}
+  if(a==="portalSifreAc"){S.sheet="portalSifre";S.sheetData={musteri:el.getAttribute("data-musteri"),kod:el.getAttribute("data-kod"),sifre:el.getAttribute("data-sifre")};render();return;}
+  if(a==="portalSifreKaydet"){const musteri=el.getAttribute("data-musteri");const kod=$("pp_kod").value.trim();const sifre=$("pp_sifre").value.trim();if(!kod||!sifre){toast("Kod ve şifre girin");return;}if(S.ekstre&&S.ekstre.musteri===musteri){S.ekstre.pk=kod;S.ekstre.ps=sifre;}S.sheet=null;S.sheetData=null;act("portalErisimKaydet",{data:{musteri:musteri,kod:kod,sifre:sifre}},"Portal bilgileri kaydedildi");return;}
   if(a==="cekDetayAc"){const i=+el.getAttribute("data-i");const c=((S.data||{}).cekler||[])[i]||{};window.cekPhotos=[];S.sheet="cekDetay";S.sheetData=c;render();return;}
   if(a==="cekKaydet"){const row=el.getAttribute("data-row");let durum=$("ck_durum").value;const yer=$("ck_yer").value.trim();const verilis=$("ck_veris").value;if(yer&&(durum==="Portföyde"))durum="Çıkış Yapıldı";if(durum==="Çıkış Yapıldı"&&!yer){toast("Çıkış için 'nereye verildi' yazın");return;}S.sheet=null;S.sheetData=null;act("cekGuncelle",{row:row,durum:durum,yer:yer,verilis:verilis,photos:(window.cekPhotos||[]).slice()},"Çek güncellendi");window.cekPhotos=[];return;}
   if(a==="teklifYanitAc"){const i=+el.getAttribute("data-i");const t=((S.data||{}).teklifler||[])[i]||{};S.sheet="teklifYanit";S.sheetData={row:t._row,musteri:t.musteri,urun:t.urun,adet:t.adet,aciklama:t.aciklama,yanit:t.yanit};render();return;}
