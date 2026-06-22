@@ -108,6 +108,7 @@ i.ic svg{display:block;}
 <body><div id="root"></div>
 <script src="config.js"></script>
 <script>
+window.LAZER_API_URL=window.LAZER_API_URL||"https://script.google.com/macros/s/AKfycby9DfBh3TTzgV-mS15CGKZWKAwlsuNwxUvFaEno5o4PzMEOq1IWjrqSSAo5CKFsog/exec";
 const $=id=>document.getElementById(id);
 const S={authed:false,kod:"",sifre:"",data:null,loading:false,tab:"ozet",ekstre:null,sheet:null,sheetData:null,busy:false,err:"",q:""};
 const money=(n,c)=>{n=Number(n)||0;const r=Math.round(Math.abs(n)*100)/100;return (n<0?'-':'')+(c||"$")+r.toLocaleString("tr-TR",{minimumFractionDigits:(r%1!==0)?2:0,maximumFractionDigits:2});};
@@ -117,7 +118,7 @@ function driveId(u){ u=String(u||""); const m=u.match(/\/d\/([-\w]{20,})/)||u.ma
 function fotoThumbs(urls,title){ if(!urls||!urls.length) return ""; return '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;">'+urls.map(u=>{ const id=driveId(u); const t=id?('https://drive.google.com/thumbnail?id='+id+'&sz=w300'):u; return '<div data-act="fotoBuyut" data-url="'+esc(u)+'" data-title="'+esc(title||"")+'" title="Büyüt / indir" style="position:relative;width:54px;height:54px;border-radius:8px;border:1px solid var(--line);overflow:hidden;cursor:zoom-in;background:var(--bg);flex:0 0 auto;"><img src="'+t+'" referrerpolicy="no-referrer" onerror="this.style.display=\'none\';this.parentNode.querySelector(\'.fph\').style.display=\'flex\';" style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;"><div class="fph" style="display:none;width:100%;height:100%;align-items:center;justify-content:center;color:var(--muted);pointer-events:none;">'+ic("img",18,"#9aa")+'</div></div>'; }).join('')+'</div>'; }
 function fotoVar(s){ return /\[Foto:/i.test(String(s||"")); }
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[m]));
-const P={grid:"M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",wallet:"M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2H5a2 2 0 0 0-2 2zM3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM16 12.5h3v3h-3a1.5 1.5 0 0 1 0-3z",check:"M20 6 9 17l-5-5",receipt:"M5 3v18l2-1.5L9 21l2-1.5L13 21l2-1.5L17 21l2-1.5V3l-2 1.5L15 3l-2 1.5L11 3 9 4.5 7 3zM8 8h8M8 12h8",cash:"M2 6h20v12H2zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6M6 9v.01M18 15v.01",minus:"M5 12h14",users:"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",clock:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 7v5l3.5 2",logout:"M16 17l5-5-5-5M21 12H9M12 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6",x:"M18 6 6 18M6 6l12 12",wrench:"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z",alert:"M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z",plus:"M12 5v14M5 12h14",cal:"M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3H4zM4 9h16v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM8 3v3M16 3v3",doc:"M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6",refresh:"M21 12a9 9 0 1 1-2.6-6.3M21 4v5h-5",cl:"m15 6-6 6 6 6",phone:"M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.1a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z",bank:"M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3",chart:"M3 3v18h18M7 15l4-5 3 3 5-7",tag:"M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82zM7 7h.01",send:"M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z",key:"M14 7a4 4 0 1 0-3.9 5L9 13l-2 2 1.5 1.5L7 18l2 2 4.1-4.1A4 4 0 0 0 14 7zM15.5 6.5h.01",pkg:"M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8",ext:"M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6",bell:"M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0",search:"M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3",trend:"M23 6l-9.5 9.5-5-5L1 18M17 6h6v6",fire:"M12 2C8 6 6 9 6 13a6 6 0 0 0 12 0c0-2-1-4-3-6 0 2-1 3-2 3 1-3-1-6-1-8z",moon:"M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z",sun:"M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4",dl:"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3",sla:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 7v5l3 2",star:"M12 2l2.4 6.5L21 11l-6.6 2.5L12 20l-2.4-6.5L3 11l6.6-2.5z",monitor:"M3 4h18v12H3zM8 20h8M12 16v4",gift:"M20 12v9H4v-9M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7",trash:"M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6",mega:"M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM15 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14",store:"M3 9l1.5-5h15L21 9M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M4 9h16M9 20v-6h6v6",warehouse:"M3 21V8l9-5 9 5v13M3 21h18M7 21v-7h4v7M14 14h3v3h-3z",edit:"M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z",img:"M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3M21 15l-5-5L5 21",eye:"M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",card:"M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 10h18M7 15h4",percent:"M19 5 5 19M6.5 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5M17.5 20a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5",spark:"M12 3l1.7 5L19 9.7l-5.3 1.6L12 17l-1.7-5.7L5 9.7l5.3-1.7zM18.5 14l.8 2.4L22 17l-2.7.9L18.5 21l-.8-3.1L15 17l2.7-.6z",cr:"M9 6l6 6-6 6",ship:"M2 20a2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1 2.4 2.4 0 0 1 2-1 2.4 2.4 0 0 1 2 1 2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1 2.4 2.4 0 0 1 2-1 2.4 2.4 0 0 1 2 1 2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1M4 18l-1-5h18l-2 5M5 13V7h8l4 6M7 7V4h4",plane:"M14.6 10.3l6.4-1.7a1.7 1.7 0 0 1 .9 3.3l-6.4 1.7-3.6 6.4H10l1.4-5.5-4.3 1.1-1.6 2.2-1.3.3 1-3.6-1-3.6 1.3.3 1.6 2.2 4.3 1.1L10 4h1.9z",cargo:"M3 9l1.5-5h15L21 9M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M4 9h16M9 20v-6h6v6"};
+const P={grid:"M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",wallet:"M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2H5a2 2 0 0 0-2 2zM3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM16 12.5h3v3h-3a1.5 1.5 0 0 1 0-3z",check:"M20 6 9 17l-5-5",receipt:"M5 3v18l2-1.5L9 21l2-1.5L13 21l2-1.5L17 21l2-1.5V3l-2 1.5L15 3l-2 1.5L11 3 9 4.5 7 3zM8 8h8M8 12h8",cash:"M2 6h20v12H2zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6M6 9v.01M18 15v.01",minus:"M5 12h14",users:"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",clock:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 7v5l3.5 2",logout:"M16 17l5-5-5-5M21 12H9M12 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6",x:"M18 6 6 18M6 6l12 12",wrench:"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z",alert:"M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z",plus:"M12 5v14M5 12h14",cal:"M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3H4zM4 9h16v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM8 3v3M16 3v3",doc:"M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6",refresh:"M21 12a9 9 0 1 1-2.6-6.3M21 4v5h-5",cl:"m15 6-6 6 6 6",phone:"M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.1a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z",bank:"M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3",chart:"M3 3v18h18M7 15l4-5 3 3 5-7",tag:"M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82zM7 7h.01",send:"M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z",key:"M14 7a4 4 0 1 0-3.9 5L9 13l-2 2 1.5 1.5L7 18l2 2 4.1-4.1A4 4 0 0 0 14 7zM15.5 6.5h.01",pkg:"M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8",ext:"M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6",bell:"M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0",search:"M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3",trend:"M23 6l-9.5 9.5-5-5L1 18M17 6h6v6",fire:"M12 2C8 6 6 9 6 13a6 6 0 0 0 12 0c0-2-1-4-3-6 0 2-1 3-2 3 1-3-1-6-1-8z",moon:"M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z",sun:"M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4",dl:"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3",sla:"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 7v5l3 2",star:"M12 2l2.4 6.5L21 11l-6.6 2.5L12 20l-2.4-6.5L3 11l6.6-2.5z",monitor:"M3 4h18v12H3zM8 20h8M12 16v4",gift:"M20 12v9H4v-9M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7",trash:"M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6",mega:"M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM15 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14",store:"M3 9l1.5-5h15L21 9M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M4 9h16M9 20v-6h6v6",warehouse:"M3 21V8l9-5 9 5v13M3 21h18M7 21v-7h4v7M14 14h3v3h-3z",edit:"M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z",img:"M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3M21 15l-5-5L5 21",eye:"M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",card:"M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 10h18M7 15h4",percent:"M19 5 5 19M6.5 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5M17.5 20a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5",spark:"M12 3l1.7 5L19 9.7l-5.3 1.6L12 17l-1.7-5.7L5 9.7l5.3-1.7zM18.5 14l.8 2.4L22 17l-2.7.9L18.5 21l-.8-3.1L15 17l2.7-.6z",cr:"M9 6l6 6-6 6",ship:"M2 20a2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1 2.4 2.4 0 0 1 2-1 2.4 2.4 0 0 1 2 1 2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1 2.4 2.4 0 0 1 2-1 2.4 2.4 0 0 1 2 1 2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1M4 18l-1-5h18l-2 5M5 13V7h8l4 6M7 7V4h4",plane:"M14.6 10.3l6.4-1.7a1.7 1.7 0 0 1 .9 3.3l-6.4 1.7-3.6 6.4H10l1.4-5.5-4.3 1.1-1.6 2.2-1.3.3 1-3.6-1-3.6 1.3.3 1.6 2.2 4.3 1.1L10 4h1.9z",cargo:"M3 9l1.5-5h15L21 9M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M4 9h16M9 20v-6h6v6",blade:"M8.12 8.12 12 12M20 4 8.12 15.88M14.8 14.8 20 20M5 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4M5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4"};
 function ic(n,s,c){const d=P[n];if(!d)return"";return '<i class="ic"><svg width="'+(s||16)+'" height="'+(s||16)+'" viewBox="0 0 24 24" fill="none" stroke="'+(c||'#6E6B7B')+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+d.split('M').filter(Boolean).map(p=>'<path d="M'+p+'"/>').join('')+'</svg></i>';}
 function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600);}
 function initials(s){s=String(s||"").trim();if(!s)return"P";const p=s.split(/\s+/);return (p[0][0]+(p[1]?p[1][0]:"")).toUpperCase();}
@@ -126,6 +127,27 @@ async function api(action,extra){
   const body=Object.assign({kod:S.kod,sifre:S.sifre,action:action},extra||{});
   const r=await fetch(window.API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)});
   return await r.json();
+}
+/* ===== ERSA LAZER (AYRI Apps Script web app) — adresi config.js'e yaz: window.LAZER_API_URL ===== */
+async function lazerApi(action,extra){
+  if(!window.LAZER_API_URL) throw new Error("no-url");
+  const body=Object.assign({kod:S.kod,sifre:S.sifre,role:"personel",action:action},extra||{});
+  const r=await fetch(window.LAZER_API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)});
+  return await r.json();
+}
+async function loadLazerPanel(){
+  if(!window.LAZER_API_URL){ S.lazer={_noUrl:true}; render(); return; }
+  S.lazerBusy=true; render();
+  try{ const r=await lazerApi("lazerPanel"); S.lazer=(r&&r.ok)?r:{_err:(r&&r.error)||"yüklenemedi"}; }
+  catch(e){ S.lazer={_err:"bağlantı hatası"}; }
+  S.lazerBusy=false; render();
+}
+async function lazerAction(action,extra,okMsg){
+  if(S.busy)return; if(!window.LAZER_API_URL){ toast("ERSA Lazer adresi tanımlı değil (config.js)"); return; }
+  S.busy=true; render();
+  try{ const r=await lazerApi(action,extra); if(r&&r.ok){ if(okMsg)toast(okMsg); } else toast((r&&r.error)||"İşlem başarısız"); }
+  catch(e){ toast("Bağlantı hatası"); }
+  S.busy=false; await loadLazerPanel();
 }
 async function login(){
   const k=$("lkod").value.trim(), s=$("lsifre").value.trim();
@@ -147,8 +169,8 @@ const EMAIL_SABLON=[
  {ad:"Sipariş bilgisi",konu:"ERSA MACHINERY · Sipariş Bilgilendirme",mesaj:"Merhaba,\n\nSiparişinizin güncel durumunu portalınızdaki “Siparişlerim” bölümünden adım adım takip edebilirsiniz. Sorularınız için bize ulaşabilirsiniz.\n\nSaygılarımızla."},
  {ad:"Genel bilgilendirme",konu:"ERSA MACHINERY · Bilgilendirme",mesaj:"Merhaba,\n\n"}
 ];
-const TABS=[["ozet","Özet","grid"],["trend","Tahsilat Trendi","trend"],["takip","Takip Listesi","phone"],["geciken","Geciken Ödemeler","alert"],["musteriler","Müşteriler & Bakiye","users"],["risk","Top Borçlular & Risk","fire"],["plan","Nakit Akışı","chart"],["odeme","Ödeme Onayları","check"],["teklif","Teklifler","tag"],["sifre","Şifre Talepleri","key"],["siparis","Siparişler","pkg"],["cek","Çek Takvimi","bank"],["servis","Servis (SLA)","wrench"],["istanbul","İstanbul Şube","doc"],["duyuru","Duyurular","mega"],["kent","KENT Ticaret","store"],["stok","Stok / Depo","warehouse"],["gumruk","Gümrük / Sevkiyat","ship"],["komisyon","K. Kartı Komisyon","card"],["aiteklif","AI Fiyat Teklifi","spark"]];
-const NAVGROUPS=[["DASHBOARD",["ozet","trend"]],["TAHSİLAT",["takip","geciken","musteriler","risk","plan","komisyon"]],["OPERASYON",["odeme","teklif","sifre","siparis","cek","servis"]],["YAPAY ZEKÂ",["aiteklif"]],["DEPO",["stok"]],["GÜMRÜK",["gumruk"]],["PORTAL",["duyuru"]],["ŞUBE",["istanbul","kent"]]];
+const TABS=[["ozet","Özet","grid"],["trend","Tahsilat Trendi","trend"],["takip","Takip Listesi","phone"],["geciken","Geciken Ödemeler","alert"],["musteriler","Müşteriler & Bakiye","users"],["risk","Top Borçlular & Risk","fire"],["plan","Nakit Akışı","chart"],["odeme","Ödeme Onayları","check"],["teklif","Teklifler","tag"],["sifre","Şifre Talepleri","key"],["siparis","Siparişler","pkg"],["cek","Çek Takvimi","bank"],["servis","Servis (SLA)","wrench"],["istanbul","İstanbul Şube","doc"],["duyuru","Duyurular","mega"],["kent","KENT Ticaret","store"],["stok","Stok / Depo","warehouse"],["gumruk","Gümrük / Sevkiyat","ship"],["ersalazer","ERSA Lazer","blade"],["komisyon","K. Kartı Komisyon","card"],["aiteklif","AI Fiyat Teklifi","spark"]];
+const NAVGROUPS=[["DASHBOARD",["ozet","trend"]],["TAHSİLAT",["takip","geciken","musteriler","risk","plan","komisyon"]],["OPERASYON",["odeme","teklif","sifre","siparis","cek","servis"]],["YAPAY ZEKÂ",["aiteklif"]],["DEPO",["stok"]],["GÜMRÜK",["gumruk"]],["PORTAL",["duyuru"]],["ŞUBE",["istanbul","kent","ersalazer"]]];
 const TITLE={ozet:["Özet","Tüm operasyon tek bakışta"],trend:["Tahsilat Trendi","Haftalık & aylık tahsilat performansı"],takip:["Takip Listesi","Bugün aranacaklar — gecikmeye göre sıralı"],risk:["Top Borçlular & Risk","Risk segmentasyonu ve en yüksek bakiyeler"],plan:["Nakit Akışı","Önümüzdeki 30 / 60 / 90 günde tahsil edilecek alacaklar"],musteriler:["Müşteriler & Bakiye","Cari bakiyeler · tek tıkla müşteri uygulamasını aç"],odeme:["Ödeme Onayları","Portaldan gelen ödeme bildirimleri"],teklif:["Teklifler","Müşteri fiyat teklifi talepleri — yanıtlayın"],sifre:["Şifre Talepleri","Makine açılış şifresi talepleri — şifreyi gönderin"],siparis:["Siparişler","Sipariş durumunu güncelleyin / yeni sipariş ekleyin"],geciken:["Geciken Ödemeler","Vadesi geçmiş taksitler"],istanbul:["İstanbul Şube","Ali'nin masraf & tahsilatları — onayınıza düşer"],cek:["Çekler","Çek portföyü ve vade takibi"],servis:["Servis Talepleri","Müşteri portalından gelen arızalar"],komisyon:["Kredi Kartı Komisyonları","Kredi kartı ödemelerinden toplanan %3,5 komisyonlar"],aiteklif:["AI Fiyat Teklifi","Çince föyü çevir · fotoğrafı temizle · antetli teklif gönder"]};
 function badgeOf(t){const o=(S.data&&S.data.ozet)||{};if(t==="takip"&&o.gecikenAdet)return[o.gecikenAdet,"#981224","#fff"];if(t==="odeme"&&o.bekleyenOnay)return[o.bekleyenOnay,"#E07B00","#111"];if(t==="teklif"&&o.bekleyenTeklif)return[o.bekleyenTeklif,"#E07B00","#111"];if(t==="sifre"&&o.bekleyenSifre)return[o.bekleyenSifre,"#E07B00","#111"];if(t==="geciken"&&o.gecikenAdet)return[o.gecikenAdet,"#981224","#fff"];if(t==="istanbul"&&o.istBekleyen)return[o.istBekleyen,"#E07B00","#111"];if(t==="servis"&&o.acikServis)return[o.acikServis,"#3B82F6","#fff"];if(t==="cek"&&o.yaklasanCek)return[o.yaklasanCek,"#3B82F6","#fff"];return null;}
 
@@ -213,6 +235,7 @@ function viewFor(){
     case "kent": return kentView();
     case "stok": return stokView();
     case "gumruk": return S.gumrukSel?gumrukDetayView():gumrukView();
+    case "ersalazer": return ersaLazerView();
     case "komisyon": return komisyonView();
     case "aiteklif": return aiTeklifView();
   } return "";
@@ -886,6 +909,67 @@ function gumrukDetayView(){
    +'<div style="display:flex;justify-content:space-between;align-items:center;margin:22px 0 10px;"><div class="sec" style="margin:0;">Masraf Kalemleri</div><button class="btn b-on" style="padding:8px 13px;" data-act="gumMasrafAc">'+ic("plus",14,"#28C76F")+' Masraf Ekle</button></div>'
    +'<div class="box">'+mrows+foot+'</div>';
 }
+function lzM(n){ return Number(n||0).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function lzDurTag(d){ var m={"Sipariş Alındı":"t-o","Üretime Alındı":"t-b","Üretildi":"t-p","Kargolandı":"t-b","Teslim Edildi":"t-g","İptal":"t-r"}[d]||"t-o"; return '<span class="pill '+m+'">'+esc(d||"")+'</span>'; }
+function ersaLazerView(){
+  var L=S.lazer;
+  if(S.lazerBusy||!L) return '<div class="box" style="padding:40px;text-align:center;color:var(--muted);">'+ic("refresh",26,"#888")+'<div style="margin-top:10px;">ERSA Lazer yükleniyor…</div></div>';
+  if(L._noUrl) return '<div class="box" style="padding:30px;"><div class="sec" style="margin:0 0 8px;">'+ic("blade",14,"#981224")+' ERSA Lazer</div><div style="font-size:13px;color:var(--ink);">ERSA Lazer ayrı bir web app. Adres tanımlı değil.<div style="font-size:12px;color:var(--muted);margin-top:8px;">ERSA Lazer Apps Script\'ini dağıtıp <b>/exec</b> adresini <code>config.js</code> içine <code>window.LAZER_API_URL</code> olarak yazın.</div></div></div>';
+  if(L._err) return '<div class="box" style="padding:30px;text-align:center;color:#EA5455;">ERSA Lazer yüklenemedi: '+esc(L._err)+'<div style="margin-top:12px;"><button class="btn b-on" data-act="lazerYenile">Tekrar dene</button></div></div>';
+  var a=L.ayar||{}, o=L.ozet||{}; var pb=a.pb||"₺";
+  var kpis='<div class="kpis">'
+   +kpic("AÇIK SİPARİŞ",String(o.acik||0),"üretim/kargo bekleyen","#981224","blade","#981224","rgba(152,18,36,.12)")
+   +kpic("BEKLEYEN ÇİZİM",String(o.bekleyenCizim||0),"çizim talebi","#E07B00","edit","#FF9F43","rgba(255,159,67,.14)")
+   +kpic("BU AY CİRO",money(o.buAyCiro||0,pb),"lazer siparişleri","#28C76F","cash","#28C76F","rgba(40,199,111,.14)")
+   +kpic("AÇIK ALACAK (TL)",money(o.toplamAlacak||0,"₺"),"Lazer cari · Makina'dan ayrı","#7367F0","wallet","#7367F0","rgba(115,103,240,.14)")
+  +'</div>';
+  // Fiyat ayarları
+  var ayar='<div class="sec" style="margin-top:22px;">'+ic("percent",14,"#981224")+' Fiyat & Üretim Ayarları</div>'
+   +'<div class="box" style="padding:16px 18px;"><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:end;">'
+   +'<div><label class="lbl">Kesim '+pb+'/m</label><input id="lz_kesim" class="field" type="number" step="0.01" value="'+(a.kesim||0)+'"></div>'
+   +'<div><label class="lbl">Bigleme '+pb+'/m</label><input id="lz_bigleme" class="field" type="number" step="0.01" value="'+(a.bigleme||0)+'"></div>'
+   +'<div><label class="lbl">Perforaj '+pb+'/m</label><input id="lz_perforaj" class="field" type="number" step="0.01" value="'+(a.perforaj||0)+'"></div>'
+   +'<div><label class="lbl">Para Birimi</label><input id="lz_pb" class="field" maxlength="3" value="'+esc(pb)+'"></div>'
+   +'<div><label class="lbl">Üretim Süresi</label><input id="lz_uretim" class="field" value="'+esc(a.uretim||"")+'"></div>'
+   +'</div><button class="btn b-on" style="margin-top:14px;padding:9px 16px;" data-act="lazerAyarKaydet">'+ic("check",14,"#28C76F")+' Ayarları Kaydet</button>'
+   +'<div style="font-size:11.5px;color:var(--muted);margin-top:8px;">Bu fiyatlar müşteri portalına yansır. Müşteri metre fiyatını görmez, sadece toplam fiyatı görür.</div></div>';
+  // Siparişler
+  var srows=(L.siparisler||[]).map(function(s){
+    var opts=(L.durumlar||[]).map(function(d){return '<option'+(d===s.durum?' selected':'')+'>'+esc(d)+'</option>';}).join('');
+    return '<div class="row" style="align-items:flex-start;flex-wrap:wrap;gap:8px;">'
+     +'<div style="width:120px;flex:0 0 auto;"><div style="font-weight:800;">'+esc(s.id)+'</div><div style="font-size:10.5px;color:var(--muted);">'+esc(s.zaman)+'</div></div>'
+     +'<div class="grow" style="min-width:150px;"><div style="font-weight:700;" class="nowrap">'+esc(s.musteri||"—")+'</div><div style="font-size:11px;color:var(--muted);">'+esc(s.dosya||"")+' · K '+lzM(s.kesim)+' · B '+lzM(s.bigleme)+' · '+lzM(s.toplam)+' m</div></div>'
+     +'<div style="width:90px;text-align:right;flex:0 0 auto;"><div class="mono" style="font-weight:800;">'+money(s.fiyat,s.pb||pb)+'</div></div>'
+     +'<div style="width:300px;flex:0 0 auto;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">'
+       +'<select id="lzd_'+esc(s.id)+'" class="sel" style="flex:1;min-width:130px;padding:6px;">'+opts+'</select>'
+       +'<input id="lzk_'+esc(s.id)+'" class="field" style="width:80px;padding:6px;" placeholder="Kargo" value="'+esc(s.kargo||"")+'">'
+       +'<input id="lzt_'+esc(s.id)+'" class="field" style="width:120px;padding:6px;" placeholder="Takip no" value="'+esc(s.takip||"")+'">'
+       +'<button class="btn b-on" style="padding:6px 10px;" data-act="lazerSipKaydet" data-id="'+esc(s.id)+'">Kaydet</button>'
+       +'<button class="iconbtn" data-act="lazerSipSil" data-id="'+esc(s.id)+'" title="Sil">'+ic("trash",14,"#EA5455")+'</button>'
+     +'</div></div>';
+  }).join('')||'<div class="empty">Henüz bıçak siparişi yok.</div>';
+  var sip='<div class="sec" style="margin-top:22px;">'+ic("blade",14,"#981224")+' Bıçak Siparişleri</div><div class="box">'+srows+'</div>';
+  // Çizim talepleri
+  var crows=(L.cizimTalepler||[]).map(function(c){
+    var fp=fotoParse(c.foto||"");
+    var opts=(L.cizimDurumlar||[]).map(function(d){return '<option'+(d===c.durum?' selected':'')+'>'+esc(d)+'</option>';}).join('');
+    return '<div class="row" style="align-items:flex-start;flex-wrap:wrap;gap:8px;">'
+     +'<div style="width:80px;flex:0 0 auto;font-size:11px;color:var(--muted);">'+esc(c.zaman)+'</div>'
+     +'<div class="grow" style="min-width:160px;"><div style="font-weight:700;">'+esc(c.musteri||"—")+(c.telefon?' · <a href="tel:'+esc(c.telefon)+'" style="color:#3B82F6;">'+esc(c.telefon)+'</a>':'')+'</div><div style="font-size:11.5px;color:var(--muted);">'+esc(c.urun||"")+(c.aciklama?" — "+esc(c.aciklama):"")+'</div>'+(fp.urls.length?'<span data-act="gumFotoAc" data-url="'+esc(fp.urls[0])+'" data-title="Çizim talebi" style="cursor:pointer;color:#3B82F6;font-size:11px;">'+ic("img",12,"#3B82F6")+' görsel</span>':'')+'</div>'
+     +'<div style="flex:0 0 auto;display:flex;gap:6px;align-items:center;"><select id="lzc_'+c._row+'" class="sel" style="padding:6px;">'+opts+'</select><button class="btn b-on" style="padding:6px 10px;" data-act="lazerCizimKaydet" data-row="'+c._row+'">Kaydet</button></div></div>';
+  }).join('')||'<div class="empty">Çizim talebi yok.</div>';
+  var cizim='<div class="sec" style="margin-top:22px;">'+ic("edit",14,"#981224")+' Çizim Talepleri (bıçak çizimi yaptırmak isteyenler)</div><div class="box">'+crows+'</div>';
+  // Hesap log
+  var hrows=(L.hesapLog||[]).map(function(h){ return '<div class="row"><div style="width:80px;flex:0 0 auto;font-size:11px;color:var(--muted);">'+esc(h.zaman)+'</div><div class="grow"><div style="font-weight:600;" class="nowrap">'+esc(h.musteri||"—")+'</div><div style="font-size:11px;color:var(--muted);">'+esc(h.dosya||"")+' · '+lzM(h.toplam)+' m</div></div><div class="mono" style="font-weight:700;">'+money(h.fiyat,pb)+'</div></div>'; }).join('')||'<div class="empty">Kayıt yok.</div>';
+  var log='<div class="sec" style="margin-top:22px;">'+ic("chart",14,"#981224")+' Hesaplama Kayıtları (siparişe dönmeyen fiyat sorgular)</div><div class="box">'+hrows+'</div>';
+  // CARİ (TL) — ERSA Makina (USD) carisinden tamamen AYRI
+  var carrows=(L.cari||[]).map(function(c){ return '<div class="row" style="align-items:center;"><div class="grow" style="min-width:0;"><div style="font-weight:700;" class="nowrap">'+esc(c.musteri)+'</div><div style="font-size:11px;color:var(--muted);">borç '+money(c.borc,"₺")+' · tahsilat '+money(c.tahsilat,"₺")+'</div></div><div style="text-align:right;width:110px;flex:0 0 auto;"><div class="mono" style="font-weight:800;color:'+(c.bakiye>0?"#EA5455":"#28C76F")+';">'+money(c.bakiye,"₺")+'</div><div style="font-size:10px;color:var(--muted);">bakiye</div></div><button class="btn b-on" style="padding:6px 10px;flex:0 0 auto;" data-act="lazerTahsilatAc" data-musteri="'+esc(c.musteri)+'">'+ic("cash",13,"#28C76F")+' Tahsilat</button></div>'; }).join('')||'<div class="empty">Henüz Lazer cari hareketi yok.</div>';
+  var cari='<div class="sec" style="margin-top:22px;display:flex;justify-content:space-between;align-items:center;">CARİ — TL (ERSA Makina hesabından AYRI)<button class="btn b-on" style="padding:6px 11px;font-size:11px;" data-act="lazerTahsilatAc" data-musteri="">'+ic("plus",12,"#28C76F")+' Tahsilat Ekle</button></div><div class="box">'+carrows+'</div>';
+  // Lazer tahsilatları (TL)
+  var trows=(L.tahsilatlar||[]).slice(0,40).map(function(t){ return '<div class="row" style="align-items:center;"><div style="width:80px;flex:0 0 auto;font-size:11px;color:var(--muted);">'+esc(t.tarih||t.zaman)+'</div><div class="grow" style="min-width:0;"><div style="font-weight:600;" class="nowrap">'+esc(t.musteri)+'</div>'+((t.yontem||t.aciklama)?'<div style="font-size:11px;color:var(--muted);">'+esc([t.yontem,t.aciklama].filter(Boolean).join(" · "))+'</div>':'')+'</div><div class="mono" style="font-weight:700;color:#28C76F;">'+money(t.tutar,"₺")+'</div><button class="iconbtn" data-act="lazerTahsilatSil" data-row="'+t._row+'" title="Sil" style="margin-left:6px;">'+ic("trash",14,"#EA5455")+'</button></div>'; }).join('')||'<div class="empty">Tahsilat kaydı yok.</div>';
+  var tahb='<div class="sec" style="margin-top:18px;">Lazer Tahsilatları (TL)</div><div class="box">'+trows+'</div>';
+  return kpis+ayar+cari+tahb+sip+cizim+log;
+}
 window.gumPhotos=[];
 window.pickGumFoto=function(e){
  var strip=document.getElementById('gm_strip'); if(!strip)return; var addlbl=strip.querySelector('label');
@@ -1185,6 +1269,17 @@ function sheetOvl(){
      +'<div id="gm_strip" style="display:flex;gap:8px;flex-wrap:wrap;"><label for="gm_file" style="width:64px;height:64px;border:1.5px dashed var(--line);border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);cursor:pointer;">'+ic('plus',18,'#8A8A8A')+'<span style="font-size:8.5px;">Ekle</span></label></div><input id="gm_file" type="file" accept="image/*" multiple style="display:none;" onchange="pickGumFoto(event)">'
      +'<button class="btnred" data-act="'+(ed?'gumMasrafGuncelleEt':'gumMasrafKaydet')+'" '+(ed?'data-row="'+esc(x.row)+'" ':'')+'style="margin-top:16px;" '+(S.busy?'disabled':'')+'>'+ic(ed?'check':'plus',16,'#fff')+' '+(ed?"Değişiklikleri Kaydet":"Masrafı Kaydet")+'</button></div></div>';
   }
+  if(S.sheet==="lazerTahsilat"){
+    const x=S.sheetData||{}; const today=new Date().toISOString().slice(0,10);
+    return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">Lazer Tahsilatı (₺)</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
+     +'<div style="font-size:11.5px;color:var(--muted);margin-bottom:12px;">ERSA Lazer cari hesabına işlenir — ana Makina (USD) carisinden tamamen ayrı, ₺.</div>'
+     +'<label class="lbl">Müşteri</label><input id="lzt_mus" class="field" value="'+esc(x.musteri||"")+'" placeholder="Müşteri adı">'
+     +'<label class="lbl">Tutar (₺)</label><input id="lzt_tut" class="field" inputmode="decimal" placeholder="0">'
+     +'<label class="lbl">Tarih</label><input id="lzt_tar" class="field" type="date" value="'+today+'">'
+     +'<label class="lbl">Yöntem</label><select id="lzt_yon" class="field"><option>Havale/EFT</option><option>Nakit</option><option>Kredi Kartı</option><option>Çek</option></select>'
+     +'<label class="lbl">Açıklama (isteğe bağlı)</label><input id="lzt_ack" class="field" placeholder="not">'
+     +'<button class="btnred" data-act="lazerTahsilatKaydet" '+(S.busy?'disabled':'')+'>'+ic('check',16,'#fff')+' Tahsilatı Kaydet</button></div></div>';
+  }
   if(S.sheet!=="tahsilat") return "";
   const pre=S.sheetData||{};
   const ed=!!pre.edit;
@@ -1206,7 +1301,7 @@ function sheetOvl(){
 }
 
 document.addEventListener("click",async e=>{
-  const tabEl=e.target.closest("[data-tab]"); if(tabEl){ S.tab=tabEl.getAttribute("data-tab"); S.ekstre=null; S.q=""; S.sheet=null; S.sheetData=null; render(); return; }
+  const tabEl=e.target.closest("[data-tab]"); if(tabEl){ S.tab=tabEl.getAttribute("data-tab"); S.ekstre=null; S.q=""; S.sheet=null; S.sheetData=null; if(S.tab==="ersalazer"){ S.lazer=null; loadLazerPanel(); } render(); return; }
   const el=e.target.closest("[data-act]"); if(!el) return;
   const a=el.getAttribute("data-act");
   if(a==="login"){login();return;}
@@ -1299,6 +1394,15 @@ document.addEventListener("click",async e=>{
   if(a==="gumMasrafDuzenleAc"){const row=el.getAttribute("data-row");const g=(S.data&&S.data.gumruk)||{};let m=null;((g.konteynerler)||[]).forEach(k=>{(k.masraflar||[]).forEach(z=>{if(String(z._row)===String(row))m=z;});});if(!m){toast("Masraf bulunamadı");return;}window.gumPhotos=[];S.sheet="gumrukMasraf";S.sheetData={edit:true,row:row,konteynerId:S.gumrukSel,kalem:m.kalem,pb:m.pb||"₺",tutar:String(m.tutar),tarih:m.tarih,durum:m.durum||"Bekliyor",aciklama:m.aciklama,foto:m.foto};render();return;}
   if(a==="gumMasrafKaydet"||a==="gumMasrafGuncelleEt"){readGumForm();const sd=S.sheetData||{};const pb=sd.pb||"₺";const kalem=(sd.kalem||"").trim();const tut=parseFloat(String(sd.tutar||"").replace(",","."))||0;if(!kalem){toast("Masraf kalemi gerekli");return;}if(!(tut>0)){toast("Tutar gerekli");return;}if(pb!=="₺"&&!(gKur(pb)>0)){toast((pb==="€"?"EUR":"USD")+" kuru alınamadı, tekrar deneyin");return;}const data={konteynerId:sd.konteynerId,kalem:kalem,tutar:String(sd.tutar),pb:pb,kur:gKur(pb),tarih:sd.tarih,durum:sd.durum||"Bekliyor",aciklama:sd.aciklama||"",photos:(window.gumPhotos||[]).slice()};const row=el.getAttribute("data-row");S.sheet=null;S.sheetData=null;if(a==="gumMasrafKaydet")act("gumrukMasrafEkle",{data:data},"Masraf eklendi ✓");else act("gumrukMasrafGuncelle",{row:row,data:data},"Masraf güncellendi ✓");window.gumPhotos=[];return;}
   if(a==="gumMasrafSil"){const row=el.getAttribute("data-row");if(!confirm("Bu masraf kalemi silinsin mi?"))return;act("gumrukMasrafSil",{row:row},"Masraf silindi");return;}
+  /* ===== ERSA Lazer ===== */
+  if(a==="lazerYenile"){loadLazerPanel();return;}
+  if(a==="lazerAyarKaydet"){const data={kesim:$("lz_kesim").value,bigleme:$("lz_bigleme").value,perforaj:$("lz_perforaj").value,pb:$("lz_pb").value.trim()||"₺",uretim:$("lz_uretim").value.trim()};lazerAction("lazerAyarKaydet",{data:data},"Fiyat ayarları kaydedildi ✓");return;}
+  if(a==="lazerSipKaydet"){const id=el.getAttribute("data-id");const durum=($("lzd_"+id)||{}).value;const kargo=($("lzk_"+id)||{}).value||"";const takip=($("lzt_"+id)||{}).value||"";lazerAction("lazerSiparisDurum",{id:id,durum:durum,kargo:kargo,takip:takip},"Sipariş güncellendi ✓");return;}
+  if(a==="lazerSipSil"){const id=el.getAttribute("data-id");if(!confirm("Bu bıçak siparişi silinsin mi?"))return;lazerAction("lazerSiparisSil",{id:id},"Sipariş silindi");return;}
+  if(a==="lazerCizimKaydet"){const row=el.getAttribute("data-row");const durum=($("lzc_"+row)||{}).value;lazerAction("lazerCizimDurum",{row:row,durum:durum},"Çizim talebi güncellendi ✓");return;}
+  if(a==="lazerTahsilatAc"){S.sheet="lazerTahsilat";S.sheetData={musteri:el.getAttribute("data-musteri")||""};render();return;}
+  if(a==="lazerTahsilatKaydet"){const data={musteri:$("lzt_mus").value.trim(),tutar:$("lzt_tut").value,tarih:$("lzt_tar").value,yontem:$("lzt_yon").value,aciklama:$("lzt_ack").value};if(!data.musteri||!(parseFloat(String(data.tutar).replace(",","."))>0)){toast("Müşteri ve tutar gerekli");return;}S.sheet=null;S.sheetData=null;lazerAction("lazerTahsilatEkle",{data:data},"Lazer tahsilatı kaydedildi ✓");return;}
+  if(a==="lazerTahsilatSil"){const row=el.getAttribute("data-row");if(!confirm("Bu Lazer tahsilatı silinsin mi? Cari bakiye güncellenir."))return;lazerAction("lazerTahsilatSil",{row:row},"Tahsilat silindi");return;}
   /* ===== AI Fiyat Teklifi ===== */
   if(a==="aiLang"){const ai=aiInit();ai.lang=el.getAttribute("data-lang");render();return;}
   if(a==="aiFileSil"){const ai=aiInit();ai.files.splice(+el.getAttribute("data-i"),1);render();return;}
