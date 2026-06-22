@@ -923,23 +923,24 @@ function ersaLazerView(){
    +kpic("BU AY CİRO",money(o.buAyCiro||0,pb),"lazer siparişleri","#28C76F","cash","#28C76F","rgba(40,199,111,.14)")
    +kpic("AÇIK ALACAK (TL)",money(o.toplamAlacak||0,"₺"),"Lazer cari · Makina'dan ayrı","#7367F0","wallet","#7367F0","rgba(115,103,240,.14)")
   +'</div>';
-  // Fiyat ayarları
-  var ayar='<div class="sec" style="margin-top:22px;">'+ic("percent",14,"#981224")+' Fiyat & Üretim Ayarları</div>'
-   +'<div class="box" style="padding:16px 18px;"><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:end;">'
-   +'<div><label class="lbl">Kesim '+pb+'/m</label><input id="lz_kesim" class="field" type="number" step="0.01" value="'+(a.kesim||0)+'"></div>'
-   +'<div><label class="lbl">Bigleme '+pb+'/m</label><input id="lz_bigleme" class="field" type="number" step="0.01" value="'+(a.bigleme||0)+'"></div>'
-   +'<div><label class="lbl">Perforaj '+pb+'/m</label><input id="lz_perforaj" class="field" type="number" step="0.01" value="'+(a.perforaj||0)+'"></div>'
+  // Fiyat ayarları — metre fiyatı (₺/m): nakit + 30/60/90 gün vadeli
+  var ayar='<div class="sec" style="margin-top:22px;">'+ic("percent",14,"#981224")+' Fiyat & Üretim Ayarları (metre fiyatı '+pb+'/m)</div>'
+   +'<div class="box" style="padding:16px 18px;"><div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;align-items:end;">'
+   +'<div><label class="lbl">Nakit '+pb+'/m</label><input id="lz_nakit" class="field" type="number" step="0.01" value="'+(a.nakit||0)+'"></div>'
+   +'<div><label class="lbl">30 Gün '+pb+'/m</label><input id="lz_g30" class="field" type="number" step="0.01" value="'+(a.g30||0)+'"></div>'
+   +'<div><label class="lbl">60 Gün '+pb+'/m</label><input id="lz_g60" class="field" type="number" step="0.01" value="'+(a.g60||0)+'"></div>'
+   +'<div><label class="lbl">90 Gün '+pb+'/m</label><input id="lz_g90" class="field" type="number" step="0.01" value="'+(a.g90||0)+'"></div>'
    +'<div><label class="lbl">Para Birimi</label><input id="lz_pb" class="field" maxlength="3" value="'+esc(pb)+'"></div>'
    +'<div><label class="lbl">Üretim Süresi</label><input id="lz_uretim" class="field" value="'+esc(a.uretim||"")+'"></div>'
    +'</div><button class="btn b-on" style="margin-top:14px;padding:9px 16px;" data-act="lazerAyarKaydet">'+ic("check",14,"#28C76F")+' Ayarları Kaydet</button>'
-   +'<div style="font-size:11.5px;color:var(--muted);margin-top:8px;">Bu fiyatlar müşteri portalına yansır. Müşteri metre fiyatını görmez, sadece toplam fiyatı görür.</div></div>';
+   +'<div style="font-size:11.5px;color:var(--muted);margin-top:8px;">Fiyat = toplam bıçak metresi × ₺/m. Müşteri nakit veya 30/60/90 gün vadeli seçer; metre fiyatını görür, kesim/bigleme görmez.</div></div>';
   // Siparişler
   var srows=(L.siparisler||[]).map(function(s){
     var opts=(L.durumlar||[]).map(function(d){return '<option'+(d===s.durum?' selected':'')+'>'+esc(d)+'</option>';}).join('');
     return '<div class="row" style="align-items:flex-start;flex-wrap:wrap;gap:8px;">'
      +'<div style="width:120px;flex:0 0 auto;"><div style="font-weight:800;">'+esc(s.id)+'</div><div style="font-size:10.5px;color:var(--muted);">'+esc(s.zaman)+'</div></div>'
-     +'<div class="grow" style="min-width:150px;"><div style="font-weight:700;" class="nowrap">'+esc(s.musteri||"—")+'</div><div style="font-size:11px;color:var(--muted);">'+esc(s.dosya||"")+' · K '+lzM(s.kesim)+' · B '+lzM(s.bigleme)+' · '+lzM(s.toplam)+' m</div></div>'
-     +'<div style="width:90px;text-align:right;flex:0 0 auto;"><div class="mono" style="font-weight:800;">'+money(s.fiyat,s.pb||pb)+'</div></div>'
+     +'<div class="grow" style="min-width:150px;"><div style="font-weight:700;" class="nowrap">'+esc(s.musteri||"—")+'</div><div style="font-size:11px;color:var(--muted);">'+esc(s.dosya||"")+' · '+lzM(s.toplam)+' m'+(s.vade?' · '+esc(s.vade):'')+'</div></div>'
+     +'<div style="width:96px;text-align:right;flex:0 0 auto;"><div class="mono" style="font-weight:800;">'+money(s.fiyat,s.pb||pb)+'</div>'+(s.vade&&s.vade!=="Nakit"?'<div style="font-size:9.5px;color:#E07B00;">'+(s.vadeTarihi?esc(s.vadeTarihi):"vadeli")+'</div>':'')+'</div>'
      +'<div style="width:300px;flex:0 0 auto;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">'
        +'<select id="lzd_'+esc(s.id)+'" class="sel" style="flex:1;min-width:130px;padding:6px;">'+opts+'</select>'
        +'<input id="lzk_'+esc(s.id)+'" class="field" style="width:80px;padding:6px;" placeholder="Kargo" value="'+esc(s.kargo||"")+'">'
@@ -1396,7 +1397,7 @@ document.addEventListener("click",async e=>{
   if(a==="gumMasrafSil"){const row=el.getAttribute("data-row");if(!confirm("Bu masraf kalemi silinsin mi?"))return;act("gumrukMasrafSil",{row:row},"Masraf silindi");return;}
   /* ===== ERSA Lazer ===== */
   if(a==="lazerYenile"){loadLazerPanel();return;}
-  if(a==="lazerAyarKaydet"){const data={kesim:$("lz_kesim").value,bigleme:$("lz_bigleme").value,perforaj:$("lz_perforaj").value,pb:$("lz_pb").value.trim()||"₺",uretim:$("lz_uretim").value.trim()};lazerAction("lazerAyarKaydet",{data:data},"Fiyat ayarları kaydedildi ✓");return;}
+  if(a==="lazerAyarKaydet"){const data={nakit:$("lz_nakit").value,g30:$("lz_g30").value,g60:$("lz_g60").value,g90:$("lz_g90").value,pb:$("lz_pb").value.trim()||"₺",uretim:$("lz_uretim").value.trim()};lazerAction("lazerAyarKaydet",{data:data},"Fiyat ayarları kaydedildi ✓");return;}
   if(a==="lazerSipKaydet"){const id=el.getAttribute("data-id");const durum=($("lzd_"+id)||{}).value;const kargo=($("lzk_"+id)||{}).value||"";const takip=($("lzt_"+id)||{}).value||"";lazerAction("lazerSiparisDurum",{id:id,durum:durum,kargo:kargo,takip:takip},"Sipariş güncellendi ✓");return;}
   if(a==="lazerSipSil"){const id=el.getAttribute("data-id");if(!confirm("Bu bıçak siparişi silinsin mi?"))return;lazerAction("lazerSiparisSil",{id:id},"Sipariş silindi");return;}
   if(a==="lazerCizimKaydet"){const row=el.getAttribute("data-row");const durum=($("lzc_"+row)||{}).value;lazerAction("lazerCizimDurum",{row:row,durum:durum},"Çizim talebi güncellendi ✓");return;}
