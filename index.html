@@ -662,6 +662,44 @@ function printEkstre(tk){
    +'</body></html>';
   S.sheet="pdfview"; S.sheetData={doc:doc, ad:e.musteri}; render();
 }
+function kutuCariPdf(ad){
+  const kt=(S.data&&S.data.kutu)||{};
+  const c=((kt.cariler)||[]).find(z=>z.ad===ad)||{ad:ad,bakiye:0,tip:"",tel:""};
+  const M=n=>"₺"+Math.round(Number(n)||0).toLocaleString("tr-TR");
+  const dd=s=>{ if(!s)return""; const p=String(s).slice(0,10).split("-"); return p.length===3?(p[2]+"."+p[1]+"."+p[0]):String(s); };
+  const t0=new Date(), tg=("0"+t0.getDate()).slice(-2)+"."+("0"+(t0.getMonth()+1)).slice(-2)+"."+t0.getFullYear();
+  const all=((kt.hareketler)||[]).filter(h=>h.cari===ad).slice().sort((a,b)=>String(a.zaman)<String(b.zaman)?-1:1);
+  let rows="", run=0, topG=0, topC=0;
+  for(let i=0;i<all.length;i++){ const h=all[i]; const g=(h.yon==="Giriş"); const amt=Math.abs(Number(h.tutar)||0); if(g){run+=amt;topG+=amt;}else{run-=amt;topC+=amt;}
+    rows+='<tr><td class="tar">'+dd(h.zaman)+'</td><td>'+esc((g?"Tahsilat":"Ödeme")+(h.yontem?" · "+h.yontem:"")+(h.aciklama?" · "+h.aciklama:""))+'</td><td class="r '+(g?'alacak':'dash')+'">'+(g?M(amt):"—")+'</td><td class="r '+(!g?'borc':'dash')+'">'+(!g?M(amt):"—")+'</td><td class="r bk">'+M(run)+'</td></tr>'; }
+  if(!all.length) rows='<tr><td colspan="5" style="text-align:center;color:#888;padding:14px;">Hareket kaydı yok.</td></tr>';
+  const tBak=(c.bakiye!=null?Number(c.bakiye):run);
+  const doc='<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cari Döküm · '+esc(ad)+'</title>'
+   +'<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">'
+   +'<style>'+EKSTRE_CSS+'</style></head><body>'
+   +'<div class="page">'
+     +'<div class="lh"><div class="band"><div class="logo"><span class="wm">ersa kutu</span><span class="est">KUTU ŞUBESİ</span></div></div><div class="title">CARİ HESAP<br>DÖKÜMÜ</div><div class="tab"></div></div>'
+     +'<div class="accent"></div>'
+     +'<div class="body">'
+       +'<div class="row1"><div class="cust"><div class="lbl">CARİ HESAP</div><div class="nm">'+esc(ad)+'</div><div class="ct">'+esc(c.tip||"Müşteri")+(c.tel?" · "+esc(c.tel):"")+'</div></div>'
+       +'<div class="meta">Döküm tarihi: <b>'+tg+'</b><br>Para birimi: <b>TL (₺)</b><br>Dönem: <b>Tüm hareketler</b></div></div>'
+       +'<div class="sum"><div class="c"><span>Toplam Giriş</span><b class="g">'+M(topG)+'</b></div><div class="c"><span>Toplam Çıkış</span><b>'+M(topC)+'</b></div><div class="c bak"><span>Güncel Bakiye</span><b>'+M(tBak)+'</b></div></div>'
+       +'<div class="sh">Hesap Hareketleri</div>'
+       +'<table><thead><tr><th style="width:78px">Tarih</th><th>Açıklama</th><th class="r">Giriş</th><th class="r">Çıkış</th><th class="r">Bakiye</th></tr></thead><tbody>'+rows+'</tbody>'
+       +'<tfoot><tr><td colspan="2">TOPLAM</td><td class="r alacak">'+M(topG)+'</td><td class="r borc">'+M(topC)+'</td><td class="r bk">'+M(tBak)+'</td></tr></tfoot></table>'
+       +'<div class="note">Bu döküm bilgilendirme amaçlıdır · ERSA KUTU şubesi (ayrı TL kasa).</div>'
+     +'</div>'
+     +'<div class="botbar"><div>info@ersamachinery.com</div><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.4 12 4l9 7.4"/><path d="M5.5 9.8V20h13V9.8"/></svg><div>www.ersamachinery.com</div></div>'
+   +'</div>'
+   +'<scr'+'ipt src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js"></scr'+'ipt>'
+   +'<scr'+'ipt>var FN='+JSON.stringify("Cari-Dokum-"+String(ad||"Cari").replace(/[^\wÀ-ſ -]/g,"").trim()+".pdf")+';'
+     +'function fitp(){var p=document.querySelector(".page");if(!p)return;p.style.zoom=1;var pw=p.offsetWidth,vw=document.documentElement.clientWidth;p.style.zoom=Math.min(1,vw/pw);}'
+     +'window.addEventListener("resize",fitp);window.addEventListener("load",fitp);setTimeout(fitp,250);setTimeout(fitp,1200);'
+     +'function indirPDF(){if(typeof html2pdf==="undefined"){alert("PDF hazırlanıyor, birkaç saniye sonra tekrar deneyin.");return;}var p=document.querySelector(".page");var z=p.style.zoom;p.style.zoom=1;html2pdf().set({margin:0,filename:FN,image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff"},jsPDF:{unit:"mm",format:"letter",orientation:"portrait"}}).from(p).save().then(function(){p.style.zoom=z;}).catch(function(){p.style.zoom=z;});}'
+   +'</scr'+'ipt>'
+   +'</body></html>';
+  S.sheet="pdfview"; S.sheetData={doc:doc, ad:ad}; render();
+}
 /* ===================== AI FİYAT TEKLİFİ ===================== */
 function aiInit(){ if(!S.ai) S.ai={step:1,lang:'tr',files:[],res:null,makineAd:'',aciklama:'',ozellikler:[],fotos:[],pb:'$',maliyet:'',kar:'30',kdv:false,musteri:'',email:'',busy:false}; return S.ai; }
 var ERSA_SATICI={unvan:"THE BOX MACHINERY DIŞ TİC. LTD. ŞTİ.",adres:"Maltepe Mah. Çifte Havuzlar Cad. Prestige Merkezi No:27 K:403 Zeytinburnu/İST",gsm:"+90 545 548 74 34 · info@ersamachinery.com",vergi:"V.D. Davutpaşa · VKN 8430730606"};
@@ -1357,7 +1395,7 @@ function sheetOvl(){
     const hrk=((kt.hareketler)||[]).filter(h=>h.cari===ad).slice().sort((a,b)=>a.zaman<b.zaman?1:-1);
     const pos=c.bakiye>=0;
     const rows=hrk.length?hrk.map(h=>{const g=(h.yon==="Giriş");return '<div class="row"><div style="width:32px;height:32px;border-radius:8px;background:'+(g?'rgba(40,199,111,.14)':'rgba(234,84,85,.14)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+ic("cash",15,g?"#28C76F":"#EA5455")+'</div><div class="grow"><div style="font-weight:700;">'+(g?"Tahsilat (giriş)":"Ödeme (çıkış)")+(h.yontem?' · '+esc(h.yontem):'')+'</div><div style="font-size:11px;color:var(--muted);">'+esc(h.zaman)+(h.aciklama?' · '+esc(h.aciklama):'')+'</div></div><div class="mono" style="font-weight:800;color:'+(g?'#28C76F':'#EA5455')+';">'+(g?'+':'−')+money(Math.abs(h.tutar),"₺")+'</div>'+durumPill(h.durum==="Onay Bekliyor"?"Onay Bekliyor":"Onaylandı")+'</div>';}).join(''):'<div class="empty">Bu cariye ait hareket yok.</div>';
-    return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">'+esc(ad)+'</div><div style="cursor:pointer;" data-act="sheetclose">'+ic("x",20,"#999")+'</div></div>'
+    return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">'+esc(ad)+'</div><div style="display:flex;align-items:center;gap:12px;"><button class="btn b-w" data-act="kutuCariPdf" data-cari="'+esc(ad)+'" style="padding:7px 13px;">'+ic("dl",13,"#981224")+' Döküm (PDF)</button><div style="cursor:pointer;" data-act="sheetclose">'+ic("x",20,"#999")+'</div></div></div>'
      +'<div class="box" style="padding:12px 15px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;"><div style="font-size:12px;color:var(--muted);">'+esc(c.tip||"Cari")+(c.tel?' · '+esc(c.tel):'')+' · '+hrk.length+' hareket</div><div style="text-align:right;"><div style="font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.4px;">GÜNCEL BAKİYE</div><div class="mono" style="font-size:19px;font-weight:800;color:'+(pos?'#28C76F':'#EA5455')+';">'+(pos?'+':'−')+money(Math.abs(c.bakiye),"₺")+'</div></div></div>'
      +'<div class="box">'+rows+'</div>'
      +'<div style="font-size:11px;color:var(--muted);margin-top:8px;">Giriş = tahsilat · Çıkış = ödeme. Onaylama "Onay Bekleyen" listesinden yapılır.</div></div></div>';
@@ -1752,6 +1790,7 @@ document.addEventListener("click",async e=>{
   if(a==="duyuruToggle"){const row=el.getAttribute("data-row");const aktif=el.getAttribute("data-aktif")==="1";act("duyuruDurum",{row:row,aktif:!aktif},aktif?"Gizlendi":"Yayınlandı");return;}
   if(a==="duyuruSil"){const row=el.getAttribute("data-row");if(!confirm("Bu duyuru silinsin mi?"))return;act("duyuruSil",{row:row},"Duyuru silindi");return;}
   if(a==="kutuCariAc"){S.sheet="kutuCari";S.sheetData={cari:el.getAttribute("data-cari")};render();return;}
+  if(a==="kutuCariPdf"){kutuCariPdf(el.getAttribute("data-cari"));return;}
   if(a==="kutuOnay"){act("kutuOnay",{tip:el.getAttribute("data-tip"),row:el.getAttribute("data-row"),durum:el.getAttribute("data-durum")},"ERSA KUTU: "+el.getAttribute("data-durum"));return;}
   if(a==="kutuSel"){const kk=el.getAttribute("data-key");S.kutuSel=S.kutuSel||{};if(S.kutuSel[kk])delete S.kutuSel[kk];else S.kutuSel[kk]=true;render();return;}
   if(a==="kutuSelAll"){const bb=((S.data&&S.data.kutu&&S.data.kutu.bekleyenler)||[]);const ks=bb.map(x=>x.tip+"|"+x._row);S.kutuSel=S.kutuSel||{};const allOn=ks.length>0&&ks.every(k=>S.kutuSel[k]);S.kutuSel={};if(!allOn)ks.forEach(k=>{S.kutuSel[k]=true;});render();return;}
