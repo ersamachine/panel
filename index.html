@@ -890,7 +890,7 @@ function kutuView(){
   const TLm=n=>money(n,"₺");
   const bdg=dur=>dur==="Onay Bekliyor"?'<span style="font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:20px;background:rgba(255,159,67,.18);color:#E07B00;">Bekliyor</span>':'<span style="font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:20px;background:rgba(40,199,111,.15);color:#28C76F;">Onaylı</span>';
   const kpi='<div class="kpis">'
-   +kpic("Kasa Bakiyesi",TLm(o.kasa),"ERSA KUTU · TL","#5E5873","cash","#981224","var(--red-soft)")
+   +kpic("Onaylı Kasa",TLm(o.kasaOnayli!=null?o.kasaOnayli:o.kasa),"onaylanmış · ERSA KUTU TL","#5E5873","cash","#981224","var(--red-soft)")
    +kpic("Bu Ay Gider",TLm(o.ayGider),"malzeme + atölye","#EA5455","alert","#EA5455","rgba(234,84,85,.14)")
    +kpic("Maaş + Yövmiye",TLm(o.ayMaasYovmiye),"bu ay","#E07B00","wallet","#FF9F43","rgba(255,159,67,.16)")
    +kpic("Cari Alacak",TLm(o.cariAlacak),"tahsil edilecek","#1F8B4C","users","#28C76F","rgba(40,199,111,.14)")
@@ -910,13 +910,20 @@ function kutuView(){
   const cari=(k.cariler||[]);
   const cariBox='<div><div class="sec">'+ic("users",13,"#3B82F6")+'CARİ HESAPLAR · tıkla → giriş/çıkış</div><div class="box">'+(cari.length?cari.map(c=>{const pos=c.bakiye>=0;return '<div class="row" data-act="kutuCariAc" data-cari="'+esc(c.ad)+'" style="cursor:pointer;"><div class="grow"><div style="font-weight:700;" class="nowrap">'+esc(c.ad)+'</div><div style="font-size:11px;color:var(--muted);">'+esc(c.tip)+(c.tel?' · '+esc(c.tel):'')+'</div></div><div class="mono" style="font-weight:800;color:'+(pos?'#28C76F':'#EA5455')+';">'+(pos?'+':'−')+money(Math.abs(c.bakiye),"₺")+'</div><span style="flex-shrink:0;margin-left:4px;">'+ic("cr",15,"#c0c0c8")+'</span></div>';}).join(''):'<div class="empty">Cari hesap yok.</div>')+'</div></div>';
   const son=(k.sonHareketler||[]).slice(0,20);
-  const sonBox='<div class="sec">'+ic("receipt",13,"#6E6B7B")+'SON HAREKETLER</div><div class="box">'+(son.length?son.map(x=>{const pos=x.tutar>=0;const fp=fotoParse(x.foto);return '<div class="row"><div class="grow"><div style="font-weight:700;" class="nowrap">'+esc(x.ad)+' <span style="color:var(--muted);font-weight:500;font-size:11px;">· '+esc(x.kategori)+'</span></div><div style="font-size:11px;color:var(--muted);">'+esc(x.zaman)+'</div>'+fotoThumbs(fp.urls,x.ad)+'</div><div style="text-align:right;"><div class="mono" style="font-weight:800;color:'+(pos?'#28C76F':'#EA5455')+';">'+(pos?'+':'−')+money(Math.abs(x.tutar),"₺")+'</div>'+bdg(x.durum)+'</div></div>';}).join(''):'<div class="empty">Hareket yok.</div>')+'</div>';
-  const flow='<div class="box" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:15px 18px;margin-bottom:14px;">'
-   +'<div style="flex:1;min-width:130px;"><div style="font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--muted);">GİREN PARA · tahsilat + nakit</div><div class="mono" style="font-size:19px;font-weight:800;color:#1F8B4C;margin-top:2px;">+'+TLm(o.toplamGiren||0)+'</div></div>'
-   +'<div style="font-size:22px;color:#b9b9c0;font-weight:300;">−</div>'
-   +'<div style="flex:1;min-width:130px;"><div style="font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--muted);">MASRAF + ÖDEME · çıkan</div><div class="mono" style="font-size:19px;font-weight:800;color:#EA5455;margin-top:2px;">−'+TLm(o.toplamCikan||0)+'</div></div>'
-   +'<div style="font-size:22px;color:#b9b9c0;font-weight:300;">=</div>'
-   +'<div style="flex:1;min-width:130px;border-left:3px solid '+((o.kasa||0)>=0?'#28C76F':'#EA5455')+';padding-left:12px;"><div style="font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--head);">KALAN (kasa)</div><div class="mono" style="font-size:22px;font-weight:800;color:'+((o.kasa||0)>=0?'#1F8B4C':'#EA5455')+';margin-top:2px;">'+TLm(o.kasa||0)+'</div></div>'
+  const kc=kat=>({'Tahsilat':['wallet','#28C76F'],'Ödeme':['users','#EA5455'],'Malzeme':['pkg','#E07B00'],'Atölye':['wrench','#7367F0'],'Maaş':['wallet','#28C76F'],'Yövmiye':['cal','#FF8A65'],'Nakit Giriş':['cash','#28C76F'],'Nakit Çıkış':['cash','#EA5455']}[kat]||['cash','#6E6B7B']);
+  const sonBox='<div class="sec">'+ic("receipt",13,"#6E6B7B")+'SON HAREKETLER · tıkla → detay</div><div class="box">'+(son.length?son.map((x,i)=>{const pos=x.tutar>=0;const ci=kc(x.kategori);return '<div class="row" data-act="kutuHrkDetay" data-i="'+i+'" style="cursor:pointer;"><div style="width:34px;height:34px;border-radius:9px;background:'+ci[1]+'22;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+ic(ci[0],17,ci[1])+'</div><div class="grow"><div style="font-weight:700;" class="nowrap">'+esc(x.ad)+' <span style="color:var(--muted);font-weight:500;font-size:11px;">· '+esc(x.kategori)+'</span></div><div style="font-size:11px;color:var(--muted);">'+esc(x.zaman)+'</div></div><div style="text-align:right;"><div class="mono" style="font-weight:800;color:'+(pos?'#28C76F':'#EA5455')+';">'+(pos?'+':'−')+money(Math.abs(x.tutar),"₺")+'</div>'+bdg(x.durum)+'</div><span style="flex-shrink:0;margin-left:4px;">'+ic("cr",14,"#c0c0c8")+'</span></div>';}).join(''):'<div class="empty">Hareket yok.</div>')+'</div>';
+  const flow='<div class="box" style="padding:15px 18px;margin-bottom:14px;">'
+   +'<div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;">'
+     +'<div style="flex:1;min-width:130px;"><div style="font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--muted);">GİREN PARA · tahsilat + nakit</div><div class="mono" style="font-size:19px;font-weight:800;color:#1F8B4C;margin-top:2px;">+'+TLm(o.toplamGiren||0)+'</div></div>'
+     +'<div style="font-size:22px;color:#b9b9c0;font-weight:300;">−</div>'
+     +'<div style="flex:1;min-width:130px;"><div style="font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--muted);">MASRAF + ÖDEME · çıkan</div><div class="mono" style="font-size:19px;font-weight:800;color:#EA5455;margin-top:2px;">−'+TLm(o.toplamCikan||0)+'</div></div>'
+     +'<div style="font-size:22px;color:#b9b9c0;font-weight:300;">=</div>'
+     +'<div style="flex:1;min-width:130px;border-left:3px solid '+((o.kasa||0)>=0?'#28C76F':'#EA5455')+';padding-left:12px;"><div style="font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--head);">CANLI KASA · tümü</div><div class="mono" style="font-size:22px;font-weight:800;color:'+((o.kasa||0)>=0?'#1F8B4C':'#EA5455')+';margin-top:2px;">'+TLm(o.kasa||0)+'</div></div>'
+   +'</div>'
+   +'<div style="display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-top:12px;padding-top:11px;border-top:1px solid var(--line);font-size:12.5px;">'
+     +'<div><span style="color:var(--muted);">Onaylı kasa:</span> <b class="mono" style="color:'+((o.kasaOnayli||0)>=0?'#1F8B4C':'#EA5455')+';">'+TLm(o.kasaOnayli||0)+'</b></div>'
+     +'<div><span style="color:var(--muted);">Bekleyen etki ('+((k.bekleyenler||[]).length)+' onay):</span> <b class="mono" style="color:#E07B00;">'+TLm(o.bekleyenEtki||0)+'</b> <span style="color:var(--muted);font-size:11px;">→ onaylanınca onaylı kasaya girer</span></div>'
+   +'</div>'
    +'</div>';
   return '<div style="font-size:12px;color:var(--muted);margin-bottom:12px;">ERSA KUTU şubesi · müdür uygulamasından gelen hareketler. Onayladıkça kayda geçer. <b>Ayrı TL kasa</b> — Makina/Lazer ile karışmaz.</div>'+kpi+flow+bekBox+'<div class="oz2" style="margin-top:4px;">'+dagBox+cariBox+'</div>'+sonBox;
 }
@@ -1388,6 +1395,22 @@ window.aiUndoEdit=function(){ if(!AIE.undo.length){toast('Geri alınacak işlem 
 window.aiCropApplyDo=function(){ var r=AIE.cropRect; if(!r||r.w<8||r.h<8){toast('Önce alan seç');return;} aiPushUndo(); var tmp=document.createElement('canvas'); tmp.width=Math.round(r.w); tmp.height=Math.round(r.h); tmp.getContext('2d').drawImage(AIE.cv,r.x,r.y,r.w,r.h,0,0,r.w,r.h); AIE.cv.width=tmp.width; AIE.cv.height=tmp.height; AIE.ctx.drawImage(tmp,0,0); var box=document.getElementById('aiCropBox'); if(box)box.style.display='none'; AIE.cropRect=null; };
 function aiEditModeUI(){ var b=document.getElementById('aiTbBrush'),cr=document.getElementById('aiTbCrop'),br=document.getElementById('aiBrushRow'),crr=document.getElementById('aiCropRow'); if(!b)return; var brush=(AIE.mode==='brush'); if(b){b.style.background=brush?'#3a2d10':'#2a2a2a';b.style.borderColor=brush?'#5a4310':'#3a3a3a';b.style.color=brush?'#F5A623':'#fff';} if(cr){cr.style.background=brush?'#2a2a2a':'#103a2a';cr.style.borderColor=brush?'#3a3a3a':'#16623f';cr.style.color=brush?'#fff':'#2ED573';} if(br)br.style.display=brush?'flex':'none'; if(crr)crr.style.display=brush?'none':'block'; }
 function sheetOvl(){
+  if(S.sheet==="kutuHrkDetay"){
+    const i=(S.sheetData&&S.sheetData.i)||0; const x=((S.data&&S.data.kutu&&S.data.kutu.sonHareketler)||[])[i];
+    if(!x){ return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">Kayıt</div><div data-act="sheetclose" style="cursor:pointer;">'+ic("x",20,"#999")+'</div></div><div class="empty">Kayıt bulunamadı.</div></div></div>'; }
+    const pos=x.tutar>=0, fp=fotoParse(x.foto||""), canAct=!!(x.tip&&x._row);
+    const dr=(l,v)=>'<div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;"><span style="color:var(--muted);">'+l+'</span><span style="text-align:right;font-weight:700;">'+v+'</span></div>';
+    return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">'+esc(x.ad||x.kategori||"Hareket")+'</div><div data-act="sheetclose" style="cursor:pointer;">'+ic("x",20,"#999")+'</div></div>'
+     +dr("Tutar",'<span style="color:'+(pos?'#28C76F':'#EA5455')+';font-weight:800;font-size:15px;">'+(pos?'+':'−')+money(Math.abs(x.tutar),"₺")+'</span>')
+     +dr("Kategori",esc(x.kategori||"—"))
+     +dr("Tarih",esc(x.zaman||"—"))
+     +(x.yontem?dr("Yöntem",esc(x.yontem)):"")
+     +(x.aciklama?dr("Açıklama",esc(x.aciklama)):"")
+     +dr("Durum",durumPill(x.durum==="Onay Bekliyor"?"Onay Bekliyor":(x.durum==="Reddedildi"?"Reddedildi":"Onaylandı")))
+     +(fp.urls.length?'<div style="margin-top:11px;"><div style="font-size:11px;color:var(--muted);margin-bottom:5px;">Fiş / belge</div>'+fotoThumbs(fp.urls,x.ad)+'</div>':"")
+     +(canAct?('<div style="display:flex;gap:8px;margin-top:15px;">'+(x.durum!=="Onaylandı"?'<button class="btn b-on" data-act="kutuHrkOnay" data-tip="'+x.tip+'" data-row="'+x._row+'" data-durum="Onaylandı" style="flex:1;justify-content:center;" '+(S.busy?'disabled':'')+'>'+ic("check",14,"#28C76F")+' Onayla</button>':'')+(x.durum!=="Reddedildi"?'<button class="btn b-no" data-act="kutuHrkOnay" data-tip="'+x.tip+'" data-row="'+x._row+'" data-durum="Reddedildi" style="flex:1;justify-content:center;" '+(S.busy?'disabled':'')+'>'+ic("x",14,"#EA5455")+' Reddet / geri al</button>':'')+'</div><div style="font-size:11px;color:var(--muted);margin-top:8px;">Tutar/açıklama düzenleme müdür uygulamasından yapılır.</div>'):'')
+     +'</div></div>';
+  }
   if(S.sheet==="kutuCari"){
     const x=S.sheetData||{}; const ad=x.cari||"";
     const kt=(S.data&&S.data.kutu)||{};
@@ -1789,6 +1812,8 @@ document.addEventListener("click",async e=>{
   if(a==="duyuruKaydet"){const metin=($("du_metin").value||"").trim();const ikon=($("du_ikon")&&$("du_ikon").value)||"star";if(!metin){toast("Duyuru metni yazın");return;}S.sheet=null;S.sheetData=null;act("duyuruEkle",{data:{metin:metin,ikon:ikon}},"Duyuru yayınlandı ✓");return;}
   if(a==="duyuruToggle"){const row=el.getAttribute("data-row");const aktif=el.getAttribute("data-aktif")==="1";act("duyuruDurum",{row:row,aktif:!aktif},aktif?"Gizlendi":"Yayınlandı");return;}
   if(a==="duyuruSil"){const row=el.getAttribute("data-row");if(!confirm("Bu duyuru silinsin mi?"))return;act("duyuruSil",{row:row},"Duyuru silindi");return;}
+  if(a==="kutuHrkDetay"){S.sheet="kutuHrkDetay";S.sheetData={i:+el.getAttribute("data-i")};render();return;}
+  if(a==="kutuHrkOnay"){const tip=el.getAttribute("data-tip"),row=el.getAttribute("data-row"),durum=el.getAttribute("data-durum");S.sheet=null;S.sheetData=null;act("kutuOnay",{tip:tip,row:row,durum:durum},"ERSA KUTU: "+durum);return;}
   if(a==="kutuCariAc"){S.sheet="kutuCari";S.sheetData={cari:el.getAttribute("data-cari")};render();return;}
   if(a==="kutuCariPdf"){kutuCariPdf(el.getAttribute("data-cari"));return;}
   if(a==="kutuOnay"){act("kutuOnay",{tip:el.getAttribute("data-tip"),row:el.getAttribute("data-row"),durum:el.getAttribute("data-durum")},"ERSA KUTU: "+el.getAttribute("data-durum"));return;}
