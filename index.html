@@ -1423,11 +1423,29 @@ window.aiAutoLogo=function(btn){
   AIE.busy=true; var orig=btn?btn.innerHTML:""; if(btn){btn.disabled=true;btn.style.opacity=".6";btn.innerHTML='AI çalışıyor… (10-25 sn)';}
   var data; try{data=AIE.cv.toDataURL("image/jpeg",0.9);}catch(e){AIE.busy=false;if(btn){btn.disabled=false;btn.style.opacity="";btn.innerHTML=orig;}toast("Görsel okunamadı");return;}
   api("aiLogoSil",{data:{image:data}}).then(function(res){
-    if(res&&res.ok&&res.image){ aiPushUndo(); var img=new Image(); img.onload=function(){ AIE.cv.width=img.width; AIE.cv.height=img.height; AIE.ctx.clearRect(0,0,img.width,img.height); AIE.ctx.drawImage(img,0,0); var box=document.getElementById('aiCropBox'); if(box)box.style.display='none'; AIE.cropRect=null; toast("AI temizledi ✓ — beğenmezsen Geri Al"); }; img.src=res.image; }
+    if(res&&res.ok&&res.image){ aiPushUndo(); var img=new Image(); img.onload=function(){ AIE.cv.width=img.width; AIE.cv.height=img.height; AIE.ctx.clearRect(0,0,img.width,img.height); AIE.ctx.drawImage(img,0,0); aiTrimWhite(); var box=document.getElementById('aiCropBox'); if(box)box.style.display='none'; AIE.cropRect=null; toast("AI temizledi + kırptı ✓ — beğenmezsen Geri Al"); }; img.src=res.image; }
     else { toast((res&&res.error)||"AI görsel döndürmedi"); }
     AIE.busy=false; if(btn){btn.disabled=false;btn.style.opacity="";btn.innerHTML=orig;}
   }).catch(function(){ AIE.busy=false; if(btn){btn.disabled=false;btn.style.opacity="";btn.innerHTML=orig;} toast("Bağlantı hatası"); });
-};;
+};
+/* AI sonrası: beyaz kenar boşluklarını otomatik kırpar → makine çerçeveye sığar (boyutuna göre kırpma) */
+function aiTrimWhite(){
+  try{
+    var c=AIE.cv, ctx=AIE.ctx, w=c.width, h=c.height; if(!w||!h) return false;
+    var d=ctx.getImageData(0,0,w,h).data, thr=244;
+    var minX=w,minY=h,maxX=0,maxY=0,found=false, st=Math.max(1,Math.floor(Math.min(w,h)/700));
+    for(var y=0;y<h;y+=st){ for(var x=0;x<w;x+=st){ var i=(y*w+x)*4; if(d[i+3]>12 && (d[i]<thr||d[i+1]<thr||d[i+2]<thr)){ if(x<minX)minX=x; if(x>maxX)maxX=x; if(y<minY)minY=y; if(y>maxY)maxY=y; found=true; } } }
+    if(!found) return false;
+    var px=Math.round(w*0.03), py=Math.round(h*0.03);
+    minX=Math.max(0,minX-px); minY=Math.max(0,minY-py); maxX=Math.min(w-1,maxX+px); maxY=Math.min(h-1,maxY+py);
+    var nw=maxX-minX+1, nh=maxY-minY+1;
+    if(nw<10||nh<10) return false;
+    if(nw>=w*0.96 && nh>=h*0.96) return false;   // zaten dolu, kırpma gereksiz
+    var tmp=document.createElement('canvas'); tmp.width=nw; tmp.height=nh; tmp.getContext('2d').drawImage(c,minX,minY,nw,nh,0,0,nw,nh);
+    c.width=nw; c.height=nh; ctx.clearRect(0,0,nw,nh); ctx.drawImage(tmp,0,0);
+    return true;
+  }catch(e){ return false; }
+};
 function aiEditModeUI(){ var b=document.getElementById('aiTbBrush'),cr=document.getElementById('aiTbCrop'),br=document.getElementById('aiBrushRow'),crr=document.getElementById('aiCropRow'); if(!b)return; var brush=(AIE.mode==='brush'); if(b){b.style.background=brush?'#3a2d10':'#2a2a2a';b.style.borderColor=brush?'#5a4310':'#3a3a3a';b.style.color=brush?'#F5A623':'#fff';} if(cr){cr.style.background=brush?'#2a2a2a':'#103a2a';cr.style.borderColor=brush?'#3a3a3a':'#16623f';cr.style.color=brush?'#fff':'#2ED573';} if(br)br.style.display=brush?'flex':'none'; if(crr)crr.style.display=brush?'none':'block'; }
 function sheetOvl(){
   if(S.sheet==="kutuOdemeBekleyen"){
