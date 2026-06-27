@@ -923,7 +923,7 @@ function kutuView(){
    +'<div style="display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-top:12px;padding-top:11px;border-top:1px solid var(--line);font-size:12.5px;">'
      +'<div><span style="color:var(--muted);">Onaylı kasa:</span> <b class="mono" style="color:'+((o.kasaOnayli||0)>=0?'#1F8B4C':'#EA5455')+';">'+TLm(o.kasaOnayli||0)+'</b></div>'
      +'<div><span style="color:var(--muted);">Bekleyen etki ('+((k.bekleyenler||[]).length)+' onay):</span> <b class="mono" style="color:#E07B00;">'+TLm(o.bekleyenEtki||0)+'</b> <span style="color:var(--muted);font-size:11px;">→ onaylanınca onaylı kasaya girer</span></div>'
-     +((o.odenmemisMasrafAdet||0)?'<div><span style="color:var(--muted);">'+ic("alert",12,"#E07B00")+' Ödeme bekleyen masraf ('+o.odenmemisMasrafAdet+'):</span> <b class="mono" style="color:#E07B00;">'+TLm(o.odenmemisMasraf||0)+'</b> <span style="color:var(--muted);font-size:11px;">→ kasadan düşmedi</span></div>':'')
+     +((o.odenmemisMasrafAdet||0)?'<div data-act="kutuOdemeBekleyenAc" style="cursor:pointer;"><span style="color:var(--muted);">'+ic("alert",12,"#E07B00")+' Ödeme bekleyen masraf ('+o.odenmemisMasrafAdet+'):</span> <b class="mono" style="color:#E07B00;">'+TLm(o.odenmemisMasraf||0)+'</b> <span style="color:#E07B00;font-size:11px;font-weight:700;">→ göster / öde ›</span></div>':'')
    +'</div>'
    +'</div>';
   return '<div style="font-size:12px;color:var(--muted);margin-bottom:12px;">ERSA KUTU şubesi · müdür uygulamasından gelen hareketler. Onayladıkça kayda geçer. <b>Ayrı TL kasa</b> — Makina/Lazer ile karışmaz.</div>'+kpi+flow+bekBox+'<div class="oz2" style="margin-top:4px;">'+dagBox+cariBox+'</div>'+sonBox;
@@ -1396,6 +1396,14 @@ window.aiUndoEdit=function(){ if(!AIE.undo.length){toast('Geri alınacak işlem 
 window.aiCropApplyDo=function(){ var r=AIE.cropRect; if(!r||r.w<8||r.h<8){toast('Önce alan seç');return;} aiPushUndo(); var tmp=document.createElement('canvas'); tmp.width=Math.round(r.w); tmp.height=Math.round(r.h); tmp.getContext('2d').drawImage(AIE.cv,r.x,r.y,r.w,r.h,0,0,r.w,r.h); AIE.cv.width=tmp.width; AIE.cv.height=tmp.height; AIE.ctx.drawImage(tmp,0,0); var box=document.getElementById('aiCropBox'); if(box)box.style.display='none'; AIE.cropRect=null; };
 function aiEditModeUI(){ var b=document.getElementById('aiTbBrush'),cr=document.getElementById('aiTbCrop'),br=document.getElementById('aiBrushRow'),crr=document.getElementById('aiCropRow'); if(!b)return; var brush=(AIE.mode==='brush'); if(b){b.style.background=brush?'#3a2d10':'#2a2a2a';b.style.borderColor=brush?'#5a4310':'#3a3a3a';b.style.color=brush?'#F5A623':'#fff';} if(cr){cr.style.background=brush?'#2a2a2a':'#103a2a';cr.style.borderColor=brush?'#3a3a3a':'#16623f';cr.style.color=brush?'#fff':'#2ED573';} if(br)br.style.display=brush?'flex':'none'; if(crr)crr.style.display=brush?'none':'block'; }
 function sheetOvl(){
+  if(S.sheet==="kutuOdemeBekleyen"){
+    const giderler=((S.data&&S.data.kutu&&S.data.kutu.giderler)||[]).filter(g=>g.odeme==="Ödenmedi").slice().sort((a,b)=>a.zaman<b.zaman?1:-1);
+    const tot=giderler.reduce((s,g)=>s+(g.tutar||0),0);
+    const rows=giderler.length?giderler.map(g=>'<div class="row" style="flex-wrap:wrap;"><div class="grow" style="min-width:150px;"><div style="font-weight:700;" class="nowrap">'+esc(g.kategori)+(g.alt?' · '+esc(g.alt):'')+'</div><div style="font-size:11px;color:var(--muted);">'+esc(g.zaman)+(g.aciklama?' · '+esc(g.aciklama):'')+'</div></div><div class="mono" style="font-weight:800;color:#EA5455;">−'+money(g.tutar,"₺")+'</div><button class="btn b-on" data-act="kutuGiderOdendiEt" data-row="'+g._row+'" '+(S.busy?'disabled':'')+'>'+ic("check",12,"#28C76F")+' Ödendi</button></div>').join(''):'<div class="empty">Ödeme bekleyen masraf yok 👍</div>';
+    return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">Ödeme Bekleyen Masraflar</div><div data-act="sheetclose" style="cursor:pointer;">'+ic("x",20,"#999")+'</div></div>'
+     +'<div style="font-size:12px;color:var(--muted);margin-bottom:11px;">Toplam <b style="color:#E07B00;">'+money(tot,"₺")+'</b> · '+giderler.length+' kayıt · <b>kasadan düşmedi</b>. "Ödendi" deyince kasadan düşer.</div>'
+     +'<div class="box">'+rows+'</div></div></div>';
+  }
   if(S.sheet==="kutuHrkDetay"){
     const i=(S.sheetData&&S.sheetData.i)||0; const x=((S.data&&S.data.kutu&&S.data.kutu.sonHareketler)||[])[i];
     if(!x){ return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">Kayıt</div><div data-act="sheetclose" style="cursor:pointer;">'+ic("x",20,"#999")+'</div></div><div class="empty">Kayıt bulunamadı.</div></div></div>'; }
@@ -1409,6 +1417,7 @@ function sheetOvl(){
      +(x.aciklama?dr("Açıklama",esc(x.aciklama)):"")
      +dr("Durum",durumPill(x.durum==="Onay Bekliyor"?"Onay Bekliyor":(x.durum==="Reddedildi"?"Reddedildi":"Onaylandı")))
      +(x.tip==="gider"?dr("Ödeme",x.odeme==="Ödenmedi"?'<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;background:rgba(245,166,35,.16);color:#E07B00;">'+ic("clock",12,"#E07B00")+' Ödeme bekleniyor</span>':'<span style="color:#28C76F;font-weight:800;">Ödendi ✓</span>'):"")
+     +((x.tip==="gider"&&x.odeme==="Ödenmedi"&&x._row)?'<button class="btn b-on" data-act="kutuGiderOdendiEt" data-row="'+x._row+'" style="width:100%;justify-content:center;margin-top:13px;" '+(S.busy?'disabled':'')+'>'+ic("cash",14,"#28C76F")+' Ödendi Olarak İşaretle</button>':"")
      +(fp.urls.length?'<div style="margin-top:11px;"><div style="font-size:11px;color:var(--muted);margin-bottom:5px;">Fiş / belge</div>'+fotoThumbs(fp.urls,x.ad)+'</div>':"")
      +(canAct?('<div style="display:flex;gap:8px;margin-top:15px;">'+(x.durum!=="Onaylandı"?'<button class="btn b-on" data-act="kutuHrkOnay" data-tip="'+x.tip+'" data-row="'+x._row+'" data-durum="Onaylandı" style="flex:1;justify-content:center;" '+(S.busy?'disabled':'')+'>'+ic("check",14,"#28C76F")+' Onayla</button>':'')+(x.durum!=="Reddedildi"?'<button class="btn b-no" data-act="kutuHrkOnay" data-tip="'+x.tip+'" data-row="'+x._row+'" data-durum="Reddedildi" style="flex:1;justify-content:center;" '+(S.busy?'disabled':'')+'>'+ic("x",14,"#EA5455")+' Reddet / geri al</button>':'')+'</div><div style="font-size:11px;color:var(--muted);margin-top:8px;">Tutar/açıklama düzenleme müdür uygulamasından yapılır.</div>'):'')
      +'</div></div>';
@@ -1818,6 +1827,8 @@ document.addEventListener("click",async e=>{
   if(a==="kutuHrkOnay"){const tip=el.getAttribute("data-tip"),row=el.getAttribute("data-row"),durum=el.getAttribute("data-durum");S.sheet=null;S.sheetData=null;act("kutuOnay",{tip:tip,row:row,durum:durum},"ERSA KUTU: "+durum);return;}
   if(a==="kutuCariAc"){S.sheet="kutuCari";S.sheetData={cari:el.getAttribute("data-cari")};render();return;}
   if(a==="kutuCariPdf"){kutuCariPdf(el.getAttribute("data-cari"));return;}
+  if(a==="kutuOdemeBekleyenAc"){S.sheet="kutuOdemeBekleyen";S.sheetData={};render();return;}
+  if(a==="kutuGiderOdendiEt"){act("kutuGiderOdendi",{row:el.getAttribute("data-row")},"Masraf ödendi olarak işaretlendi ✓");return;}
   if(a==="kutuOnay"){act("kutuOnay",{tip:el.getAttribute("data-tip"),row:el.getAttribute("data-row"),durum:el.getAttribute("data-durum")},"ERSA KUTU: "+el.getAttribute("data-durum"));return;}
   if(a==="kutuSel"){const kk=el.getAttribute("data-key");S.kutuSel=S.kutuSel||{};if(S.kutuSel[kk])delete S.kutuSel[kk];else S.kutuSel[kk]=true;render();return;}
   if(a==="kutuSelAll"){const bb=((S.data&&S.data.kutu&&S.data.kutu.bekleyenler)||[]);const ks=bb.map(x=>x.tip+"|"+x._row);S.kutuSel=S.kutuSel||{};const allOn=ks.length>0&&ks.every(k=>S.kutuSel[k]);S.kutuSel={};if(!allOn)ks.forEach(k=>{S.kutuSel[k]=true;});render();return;}
