@@ -417,6 +417,8 @@ function karneKart(kn){
 }
 function ekstreView(){
   const e=S.ekstre||{}, o=e.ozet||{}; const m=e.musteri;
+  const cekTop360=(e.cekler||[]).filter(c=>["Tahsil Edildi","Ödendi","Karşılıksız","İade"].indexOf(String(c.durum||""))<0).reduce((a,c)=>a+(Number(c.usd)||0),0);
+  const bakNet=(Number(o.bakiye)||0)-cekTop360;
   const tel=e.tel||""; const email=e.email||"";
   if(!S.accSel)S.accSel="tahsilatlar";
   const btn=(act,extra,icn,col,lbl)=>'<button class="btn b-w" '+act+' '+(extra||"")+' style="flex:0 0 auto;">'+ic(icn,13,col)+' '+lbl+'</button>';
@@ -477,7 +479,7 @@ function ekstreView(){
   var _panel='<div class="box" style="padding:0;margin-top:14px;overflow:hidden;"><div style="display:flex;align-items:center;gap:11px;padding:12px 15px;border-bottom:1px solid var(--line);border-left:4px solid '+_sel.col+';">'+ic(_sel.ic,18,_sel.col)+'<span style="flex:1;font-size:12px;font-weight:800;letter-spacing:.4px;color:var(--head);">'+_sel.lbl.toLocaleUpperCase("tr")+'</span>'+(_sel.act||"")+'</div><div>'+_sel.c+'</div></div>';
   return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;cursor:pointer;" data-act="ekstreBack">'+ic('cl',18,'#8A8A8A')+' <span style="color:var(--muted);font-weight:600;">Müşteriler</span></div>'
    +'<div class="box" style="padding:16px;margin-bottom:14px;"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><div style="font-size:17px;font-weight:800;">'+esc(m)+'</div>'+riskBadge(kn)+'</div>'
-   +'<div style="display:flex;gap:24px;margin-top:12px;flex-wrap:wrap;"><div><div style="font-size:10px;color:var(--muted);">BAKİYE</div><div class="mono" style="font-size:19px;font-weight:800;color:'+((o.bakiye||0)>0?"#EA5455":"#28C76F")+';">'+money(o.bakiye)+'</div></div><div><div style="font-size:10px;color:var(--muted);">FATURA</div><div class="mono" style="font-size:14px;font-weight:700;">'+money(o.toplamFatura)+'</div></div><div><div style="font-size:10px;color:var(--muted);">TAHSİLAT</div><div class="mono" style="font-size:14px;font-weight:700;color:#28C76F;">'+money(o.toplamTahsilat)+'</div></div></div>'
+   +'<div style="display:flex;gap:24px;margin-top:12px;flex-wrap:wrap;"><div><div style="font-size:10px;color:var(--muted);">BAKİYE'+(cekTop360>0?' (çek düşülmüş)':'')+'</div><div class="mono" style="font-size:19px;font-weight:800;color:'+(bakNet>0?"#EA5455":"#28C76F")+';">'+money(bakNet)+'</div></div><div><div style="font-size:10px;color:var(--muted);">FATURA</div><div class="mono" style="font-size:14px;font-weight:700;">'+money(o.toplamFatura)+'</div></div><div><div style="font-size:10px;color:var(--muted);">TAHSİLAT</div><div class="mono" style="font-size:14px;font-weight:700;color:#28C76F;">'+money(o.toplamTahsilat)+'</div></div>'+(cekTop360>0?'<div><div style="font-size:10px;color:var(--muted);">PORTFÖY ÇEK</div><div class="mono" style="font-size:14px;font-weight:700;color:#3B82F6;">−'+money(cekTop360)+'</div></div>':'')+'</div>'
    +(email?'<div style="font-size:11px;color:var(--muted);margin-top:8px;">'+esc(email)+(tel?' · '+esc(tel):'')+'</div>':(tel?'<div style="font-size:11px;color:var(--muted);margin-top:8px;">'+esc(tel)+'</div>':''))
    +acts+'</div>'
    +_grid+_panel;
