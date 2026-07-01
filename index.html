@@ -1124,7 +1124,19 @@ function gumrukView(){
      +'<div style="text-align:right;flex:0 0 auto;margin:0 10px;"><div class="mono" style="font-weight:800;">'+tl(k.toplam)+'</div><div style="font-size:10px;color:var(--muted);">'+(k.bekleyen>0?('bekleyen '+tl(k.bekleyen)):'toplam masraf')+'</div></div>'
      +ic('cl',16,'#666')+'</div>';
   }).join('')||'<div class="empty">Henüz konteyner kaydı yok. “Yeni Konteyner Dosyası” ile başlayın.</div>';
-  return kpis+bar+'<div class="box">'+rows+'</div>';
+  var _sena=(S.data&&S.data.sena)||{bekleyen:[],onayliOdenmemis:[]};
+  var _srow=function(m,mode){ var fp=fotoParse(m.belge||""); var eye=(fp.urls.length?'<span data-act="gumFotoAc" data-url="'+esc(fp.urls[0])+'" data-title="'+esc(m.kalem)+'" style="cursor:pointer;padding:4px;flex:0 0 auto;" title="Belgeyi gör">'+ic("eye",15,"#3B82F6")+'</span>':'');
+    var acts=(mode==="bekle")
+     ? '<button class="btn b-on" data-act="senaOnay" data-row="'+m._row+'" data-durum="Onaylandı">'+ic("check",12,"#28C76F")+' Onayla</button><button class="btn b-no" data-act="senaOnay" data-row="'+m._row+'" data-durum="Reddedildi">'+ic("x",12,"#EA5455")+'</button>'
+     : '<span class="pill p-b">Onaylandı</span><button class="btn b-on" data-act="senaOde" data-row="'+m._row+'">'+ic("cash",12,"#28C76F")+' Ödendi</button>';
+    return '<div class="row"><div style="width:38px;height:38px;border-radius:9px;background:rgba(219,58,76,.1);display:flex;align-items:center;justify-content:center;flex:0 0 auto;">'+ic("doc",18,"#DB3A4C")+'</div><div class="grow" style="min-width:0;margin-left:11px;"><div style="font-weight:700;" class="nowrap">'+esc(m.kalem)+' · <span class="mono">'+money(m.tl,"₺")+'</span>'+(m.pb!=="₺"?' <span style="font-size:10px;color:var(--muted);">('+money(m.tutar,m.pb)+')</span>':'')+'</div><div style="font-size:11px;color:var(--muted);" class="nowrap">'+esc([m.sevNo,m.urun,m.tarih,m.aciklama].filter(Boolean).join(" · ")||"—")+'</div></div>'+eye+acts+'</div>'; };
+  var _senaBox="";
+  if((_sena.bekleyen&&_sena.bekleyen.length)||(_sena.onayliOdenmemis&&_sena.onayliOdenmemis.length)){
+    var _bk=(_sena.bekleyen||[]).map(function(m){return _srow(m,"bekle");}).join('');
+    var _on=(_sena.onayliOdenmemis||[]).map(function(m){return _srow(m,"ode");}).join('');
+    _senaBox='<div class="sec" style="margin-top:22px;">'+ic("doc",13,"#DB3A4C")+' SENA GÜMRÜK ONAYLARI'+((_sena.bekleyen&&_sena.bekleyen.length)?'<span style="margin-left:8px;background:rgba(255,159,67,.16);color:#E07B00;font-size:10px;font-weight:800;border-radius:20px;padding:2px 9px;letter-spacing:0;text-transform:none;">'+_sena.bekleyen.length+' onay bekliyor</span>':'')+'</div><div class="box">'+_bk+_on+'</div>';
+  }
+  return kpis+_senaBox+bar+'<div class="box">'+rows+'</div>';
 }
 function gumrukDetayView(){
   var g=(S.data&&S.data.gumruk)||{konteynerler:[]}; var list=g.konteynerler||[]; var k=null;
@@ -2050,6 +2062,8 @@ document.addEventListener("click",async e=>{
   if(a==="gumDocDelYeni"){readGumForm();var gpi=+el.getAttribute("data-i");if(window.gumPhotos)window.gumPhotos.splice(gpi,1);render();return;}
   if(a==="gumDocDelEski"){readGumForm();var gpu=el.getAttribute("data-url");if(S.sheetData){var gfp=fotoParse(S.sheetData.foto||"");var gkeep=gfp.urls.filter(function(z){return z!==gpu;});S.sheetData.foto=gkeep.length?("[Foto: "+gkeep.join("  ")+"]"):"";}render();return;}
   if(a==="gumFotoAc"){S.sheet="foto";S.sheetData={url:el.getAttribute("data-url"),title:el.getAttribute("data-title")||"Belge"};render();return;}
+  if(a==="senaOnay"){const row=el.getAttribute("data-row");const durum=el.getAttribute("data-durum");if(durum==="Reddedildi"&&!confirm("Bu Sena masrafı reddedilsin mi?"))return;act("senaOnay",{row:row,durum:durum},durum==="Onaylandı"?"Onaylandı ✓":"Reddedildi");return;}
+  if(a==="senaOde"){const row=el.getAttribute("data-row");if(!confirm("Bu masraf ödendi olarak işaretlensin mi?"))return;act("senaOde",{row:row},"Ödendi işaretlendi ✓");return;}
   if(a==="gumMasrafDuzenleAc"){const row=el.getAttribute("data-row");const g=(S.data&&S.data.gumruk)||{};let m=null;((g.konteynerler)||[]).forEach(k=>{(k.masraflar||[]).forEach(z=>{if(String(z._row)===String(row))m=z;});});if(!m){toast("Masraf bulunamadı");return;}window.gumPhotos=[];S.sheet="gumrukMasraf";S.sheetData={edit:true,row:row,konteynerId:S.gumrukSel,kalem:m.kalem,pb:m.pb||"₺",tutar:String(m.tutar),tarih:m.tarih,durum:m.durum||"Bekliyor",aciklama:m.aciklama,foto:m.foto};render();return;}
   if(a==="gumMasrafKaydet"||a==="gumMasrafGuncelleEt"){readGumForm();const sd=S.sheetData||{};const pb=sd.pb||"₺";const kalem=(sd.kalem||"").trim();const tut=parseFloat(String(sd.tutar||"").replace(",","."))||0;if(!kalem){toast("Masraf kalemi gerekli");return;}if(!(tut>0)){toast("Tutar gerekli");return;}if(pb!=="₺"&&!(gKur(pb)>0)){toast((pb==="€"?"EUR":"USD")+" kuru alınamadı, tekrar deneyin");return;}const data={konteynerId:sd.konteynerId,kalem:kalem,tutar:String(sd.tutar),pb:pb,kur:gKur(pb),tarih:sd.tarih,durum:sd.durum||"Bekliyor",aciklama:sd.aciklama||"",keepFoto:(sd.foto||""),photos:(window.gumPhotos||[]).slice()};const row=el.getAttribute("data-row");S.sheet=null;S.sheetData=null;if(a==="gumMasrafKaydet")act("gumrukMasrafEkle",{data:data},"Masraf eklendi ✓");else act("gumrukMasrafGuncelle",{row:row,data:data},"Masraf güncellendi ✓");window.gumPhotos=[];return;}
   if(a==="gumMasrafSil"){const row=el.getAttribute("data-row");if(!confirm("Bu masraf kalemi silinsin mi?"))return;act("gumrukMasrafSil",{row:row},"Masraf silindi");return;}
