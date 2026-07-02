@@ -1191,7 +1191,17 @@ function gumrukView(){
       +(digK.length?('<div class="sec" style="margin:18px 0 8px;">'+ic("cash",13,"#888")+' Diğer SENA kalemleri · '+tl(_oz.supheli+_oz.diger)+'</div><div class="box">'+digK.map(_mrow).join('')+'</div>'):'');
   }
   var _foot=(_list.length<_cnt.hepsi)?'<div style="text-align:center;font-size:11.5px;color:var(--muted);margin-top:9px;">'+_cnt.hepsi+' sevkiyattan '+_list.length+' tanesi gösteriliyor</div>':'';
-  return kpis+_senaBox+bar+chips+'<div class="box">'+rows+'</div>'+_foot+ozBox+cariBox;
+  // V90: SENA'ya ödemelerim (dekontlar, cari bakiyeden düşer)
+  var _sc=(S.data&&S.data.senaCari)||{}; var _odm=(_sc.odemeler)||[]; var _odenen=_sc.odenenToplam||0; var _kalan=_sc.guncelBakiye||0; var _borc=_kalan+_odenen;
+  var odemeBox="";
+  if(_kalan>0 || _odm.length){
+    var _oc=function(lbl,val,col,sub){ return '<div style="flex:1;min-width:150px;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:13px 15px;"><div style="font-size:10.5px;color:var(--muted);font-weight:700;">'+lbl+'</div><div class="mono" style="font-size:20px;font-weight:800;color:'+col+';margin-top:2px;line-height:1.1;">'+tl(val)+'</div>'+(sub?'<div style="font-size:10.5px;color:'+col+';font-weight:600;margin-top:2px;">'+sub+'</div>':'')+'</div>'; };
+    var _orow=function(o){ var fp=fotoParse(o.belge||""); return '<div class="row" style="align-items:center;"><div style="width:38px;height:38px;border-radius:9px;background:rgba(219,58,76,.1);display:flex;align-items:center;justify-content:center;flex:0 0 auto;">'+ic("cash",17,"#DB3A4C")+'</div><div class="grow" style="min-width:0;margin-left:11px;"><div style="font-weight:700;" class="nowrap">'+esc(o.dekont||"Ödeme")+'</div><div style="font-size:11px;color:var(--muted);" class="nowrap">'+esc([o.tarih,o.not].filter(Boolean).join(" · ")||"—")+'</div></div>'+(fp.urls.length?'<span style="cursor:pointer;padding:5px;flex:0 0 auto;" data-act="gumFotoAc" data-url="'+esc(fp.urls[0])+'" data-title="Ödeme dekontu" title="Dekontu gör">'+ic("eye",15,"#3B82F6")+'</span>':'')+'<div class="mono" style="font-weight:800;color:#DB3A4C;white-space:nowrap;flex:0 0 auto;margin-left:8px;">− '+tl(Math.abs(o.tahsilat))+'</div></div>'; };
+    odemeBox='<div style="display:flex;justify-content:space-between;align-items:center;margin:26px 0 10px;flex-wrap:wrap;gap:8px;"><div class="sec" style="margin:0;">'+ic("bank",14,"#DB3A4C")+' SENA\'YA ÖDEMELERİM</div><button class="btn b-on" style="padding:8px 13px;" data-act="senaOdemeAc">'+ic("cash",13,"#28C76F")+' Ödeme / Dekont Ekle</button></div>'
+      +'<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">'+_oc("TOPLAM BORÇ",_borc,"#5E5873","SENA cari")+_oc("ÖDENEN",_odenen,"#1A9E55",_odm.length+" dekont")+_oc("KALAN BORÇ",_kalan,"#DB3A4C","ödenecek")+'</div>'
+      +(_odm.length?('<div class="box">'+_odm.map(_orow).join('')+'</div>'):'<div class="empty" style="padding:18px;">Henüz ödeme dekontu eklenmedi. “Ödeme / Dekont Ekle” ile başla.</div>');
+  }
+  return kpis+_senaBox+bar+chips+'<div class="box">'+rows+'</div>'+_foot+ozBox+odemeBox+cariBox;
 }
 function gumrukDetayView(){
   var g=(S.data&&S.data.gumruk)||{konteynerler:[]}; var list=g.konteynerler||[]; var k=null;
@@ -1431,6 +1441,10 @@ function yapilacakView(){
   return html;
 }
 window.gumPhotos=[];
+window.senaOdemeCalc=function(){ var t=parseFloat(String((($("so_tut")||{}).value)||"").replace(",","."))||0; var _sc=(S.data&&S.data.senaCari)||{}; var bak=_sc.guncelBakiye||0; var el=$("so_kalan"); if(el)el.innerHTML='<span style="text-decoration:line-through;color:var(--muted);font-weight:600;font-size:12px;">'+money(bak,"₺")+'</span> → '+money(Math.round((bak-t)*100)/100,"₺"); };
+function odemeStripHtml(){ var h=""; (window.gumPhotos||[]).forEach(function(gd,gi){ var pdf=/^data:application\/pdf/i.test(gd); h+='<div style="position:relative;width:64px;height:64px;border-radius:11px;border:1px solid var(--line);overflow:hidden;flex:0 0 auto;">'+(pdf?'<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fdeaea;color:#DB3A4C;font-size:9px;font-weight:800;">PDF</div>':'<div style="width:100%;height:100%;background-size:cover;background-position:center;background-image:url('+gd+')"></div>')+'<span data-act="odemeDocDel" data-i="'+gi+'" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(219,58,76,.92);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;cursor:pointer;">×</span></div>'; }); h+='<label for="so_file" style="width:64px;height:64px;border:1.5px dashed var(--line);border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);cursor:pointer;">'+ic("plus",18,"#8A8A8A")+'<span style="font-size:8.5px;">Ekle</span></label>'; return h; }
+function rebuildOdemeStrip(){ var s=$("so_strip"); if(s)s.innerHTML=odemeStripHtml(); }
+window.pickOdemeFoto=function(e){ if(!window.gumPhotos)window.gumPhotos=[]; Array.prototype.forEach.call(e.target.files,function(f){ if(window.gumPhotos.length>=4)return; var isPdf=/pdf/i.test(f.type)||/\.pdf$/i.test(f.name),isImg=/^image\//.test(f.type); if(!isPdf&&!isImg){toast("Sadece JPG veya PDF");return;} var rd=new FileReader(); rd.onload=function(){ window.gumPhotos.push(rd.result); rebuildOdemeStrip(); }; rd.readAsDataURL(f); }); e.target.value=""; };
 window.pickGumFoto=function(e){
  if(!window.gumPhotos)window.gumPhotos=[];
  readGumForm();   // V73: render öncesi form alanlarını koru
@@ -1984,6 +1998,17 @@ function sheetOvl(){
      +'<label class="lbl">Not</label><input id="ca_not" class="field" placeholder="opsiyonel">'
      +'<button class="btnred" data-act="senaCariKaydet" '+(S.busy?'disabled':'')+'>'+ic('plus',16,'#fff')+' Dekontu Ekle</button></div></div>';
   }
+  if(S.sheet==="senaOdemeForm"){
+    const today=new Date().toISOString().slice(0,10);
+    const _sc=(S.data&&S.data.senaCari)||{}; const _bak=_sc.guncelBakiye||0;
+    return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">Ödeme / Dekont Ekle</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
+     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><div><label class="lbl">Tutar (₺)</label><input id="so_tut" class="field" inputmode="decimal" oninput="senaOdemeCalc()" placeholder="0"></div><div><label class="lbl">Tarih</label><input id="so_tar" class="field" type="date" value="'+today+'"></div></div>'
+     +'<label class="lbl">Ödeme Şekli</label><select id="so_sekil" class="field"><option>Havale/EFT</option><option>Nakit</option><option>Kart</option><option>Çek</option></select>'
+     +'<label class="lbl">Açıklama</label><input id="so_ack" class="field" placeholder="opsiyonel (örn. gümrük vergisi ödemesi)">'
+     +'<label class="lbl">Dekont (foto veya PDF)</label><div id="so_strip" style="display:flex;gap:8px;flex-wrap:wrap;">'+odemeStripHtml()+'</div><input id="so_file" type="file" accept="image/*,application/pdf" multiple style="display:none;" onchange="pickOdemeFoto(event)">'
+     +'<div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 2px;padding:11px 14px;border-radius:9px;background:rgba(219,58,76,.08);border:1px solid #DB3A4C;"><span style="font-size:11px;color:var(--muted);font-weight:600;">Kalan bakiye</span><span id="so_kalan" class="mono" style="font-weight:800;color:#DB3A4C;"><span style="text-decoration:line-through;color:var(--muted);font-weight:600;font-size:12px;">'+money(_bak,"₺")+'</span> → '+money(_bak,"₺")+'</span></div>'
+     +'<button class="btnred" data-act="senaOdemeKaydet" '+(S.busy?'disabled':'')+'>'+ic('check',16,'#fff')+' Ödemeyi Kaydet</button></div></div>';
+  }
   if(S.sheet==="lazerTahsilat"){
     const x=S.sheetData||{}; const today=new Date().toISOString().slice(0,10);
     return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">Lazer Tahsilatı (₺)</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
@@ -2173,6 +2198,9 @@ document.addEventListener("click",async e=>{
   if(a==="gumDevirSil"){const row=el.getAttribute("data-row");if(!confirm("Bu devir kaydı silinsin mi?"))return;act("gumDevirSil",{row:row},"Devir silindi");return;}
   if(a==="senaCariAc"){S.sheet="senaCariForm";S.sheetData={};render();return;}
   if(a==="senaCariKaydet"){var dk=(($("ca_dekont")||{}).value||"").trim();if(!dk){toast("Dekont no gerekli");return;}var data={dekont:dk,tarih:($("ca_tarih")||{}).value||"",dosya:($("ca_dosya")||{}).value||"",toplam:($("ca_toplam")||{}).value||"",tahsilat:($("ca_tahsilat")||{}).value||"",bakiye:($("ca_bakiye")||{}).value||"",not:($("ca_not")||{}).value||""};S.sheet=null;S.sheetData=null;act("senaCariEkle",{data:data},"Dekont eklendi ✓");return;}
+  if(a==="senaOdemeAc"){window.gumPhotos=[];S.sheet="senaOdemeForm";S.sheetData={};render();return;}
+  if(a==="senaOdemeKaydet"){var _t=parseFloat(String(($("so_tut")||{}).value||"").replace(",","."))||0;if(!(_t>0)){toast("Tutar gerekli");return;}var _od={tutar:String(_t),tarih:($("so_tar")||{}).value||"",sekil:($("so_sekil")||{}).value||"Havale/EFT",aciklama:($("so_ack")||{}).value||"",dekontlar:(window.gumPhotos||[]).slice()};S.sheet=null;S.sheetData=null;window.gumPhotos=[];act("senaOdemeEkle",{data:_od},"Ödeme kaydedildi ✓");return;}
+  if(a==="odemeDocDel"){var _oi=+el.getAttribute("data-i");if(window.gumPhotos)window.gumPhotos.splice(_oi,1);rebuildOdemeStrip();return;}
   if(a==="senaCariSil"){const row=el.getAttribute("data-row");if(!confirm("Bu dekont satırı silinsin mi?"))return;act("senaCariSil",{row:row},"Dekont silindi");return;}
   /* ===== ERSA Lazer ===== */
   if(a==="lazerYenile"){loadLazerPanel();return;}
