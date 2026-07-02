@@ -1151,7 +1151,26 @@ function gumrukView(){
     }).join('');
     cariBox='<div style="display:flex;justify-content:space-between;align-items:center;margin:26px 0 10px;flex-wrap:wrap;gap:8px;"><div class="sec" style="margin:0;">'+ic("bank",14,"#DB3A4C")+' SENA GÜMRÜK CARİ HESAP</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><span style="font-size:11px;color:var(--muted);">'+_cari.adet+' dekont · güncel bakiye <b style="color:#DB3A4C;font-size:13px;">'+money(_cari.guncelBakiye,"₺")+'</b></span><button class="btn b-on" style="padding:8px 12px;" data-act="senaCariAc">'+ic("plus",13,"#28C76F")+' Dekont Ekle</button></div></div><div class="box" style="overflow-x:auto;">'+crows+'</div>';
   }
-  return kpis+_senaBox+bar+'<div class="box">'+rows+'</div>'+cariBox;
+  // V87: SENA'ya ödenen masraf özeti (kalem bazında dashboard)
+  var _oz=(S.data&&S.data.senaOzet)||{toplam:0,komisyon:0,supheli:0,diger:0,kalemler:[]};
+  var ozBox="";
+  if(_oz.toplam>0){
+    var maxK=0; _oz.kalemler.forEach(function(x){ if(x.tutar>maxK)maxK=x.tutar; });
+    var komK=_oz.kalemler.filter(function(x){return x.grup==="komisyon";});
+    var digK=_oz.kalemler.filter(function(x){return x.grup==="supheli"||x.grup==="diger";});
+    var _mrow=function(x){ var sup=(x.grup==="supheli"); var w=maxK>0?Math.max(2,Math.round(x.tutar/maxK*100)):0; var col=(x.grup==="komisyon")?"#DB3A4C":(sup?"#EA5455":"#B4B2A9");
+      return '<div style="padding:11px 16px;border-bottom:1px solid var(--line);"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;"><div style="font-size:13px;font-weight:700;color:var(--ink);">'+esc(x.kalem)+(sup?' <span class="pill p-r" style="font-size:9px;margin-left:4px;">⚠ şüpheli</span>':'')+'</div><div class="mono" style="font-weight:800;color:'+(sup?"#C0392B":"var(--ink)")+';white-space:nowrap;">'+tl(x.tutar)+'</div></div><div style="height:6px;border-radius:6px;background:var(--card2);margin-top:7px;overflow:hidden;"><div style="height:100%;border-radius:6px;width:'+w+'%;background:'+col+';"></div></div></div>'; };
+    var _ozkart=function(lbl,val,sub,icon,col,bg){ return '<div class="kpi" style="display:flex;align-items:flex-start;gap:12px;"><div class="ki" style="background:'+bg+';">'+ic(icon,20,col)+'</div><div style="min-width:0;"><div style="color:var(--muted);font-size:10.5px;font-weight:700;">'+lbl+'</div><div class="mono" style="color:var(--head);font-size:20px;font-weight:800;margin-top:2px;line-height:1.1;">'+val+'</div><div style="font-size:10px;font-weight:700;color:'+col+';margin-top:2px;">'+sub+'</div></div></div>'; };
+    ozBox='<div class="sec" style="margin-top:26px;">'+ic("cash",14,"#DB3A4C")+' SENA GÜMRÜK · MASRAF ÖZETİ</div>'
+      +'<div class="kpis" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px;">'
+       +_ozkart("SENA'YA ÖDENEN TOPLAM",tl(_oz.toplam),"tüm SENA kalemleri","#DB3A4C","cash","rgba(219,58,76,.1)")
+       +_ozkart("SAF KOMİSYON",tl(_oz.komisyon),"müşavirlik + devir + aktarma","#1A9E55","receipt","rgba(40,199,111,.14)")
+       +_ozkart("ŞÜPHELİ KALEMLER",tl(_oz.supheli),"özel izin + açık masraf","#C0392B","alert","rgba(234,84,85,.14)")
+      +'</div>'
+      +(komK.length?('<div class="sec" style="margin:0 0 8px;">'+ic("receipt",13,"#1A9E55")+' Komisyonlar · '+tl(_oz.komisyon)+'</div><div class="box">'+komK.map(_mrow).join('')+'</div>'):'')
+      +(digK.length?('<div class="sec" style="margin:18px 0 8px;">'+ic("cash",13,"#888")+' Diğer SENA kalemleri · '+tl(_oz.supheli+_oz.diger)+'</div><div class="box">'+digK.map(_mrow).join('')+'</div>'):'');
+  }
+  return kpis+_senaBox+bar+'<div class="box">'+rows+'</div>'+ozBox+cariBox;
 }
 function gumrukDetayView(){
   var g=(S.data&&S.data.gumruk)||{konteynerler:[]}; var list=g.konteynerler||[]; var k=null;
