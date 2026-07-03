@@ -202,6 +202,18 @@ i.ic svg{display:block;}
 .gmsum .v{font-size:16px;font-weight:800;margin-top:3px;}
 .gmsum .s{font-size:10.5px;margin-top:2px;opacity:.8;}
 .gtagS{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:5px;background:#DB3A4C;color:#fff;margin-left:6px;letter-spacing:.3px;}
+.ghstrip{display:flex;gap:0;margin-top:18px;align-items:stretch;flex-wrap:wrap;}
+.ghstt{flex:1;min-width:170px;padding:2px 22px;border-left:1px solid rgba(255,255,255,.22);margin-bottom:8px;}
+.ghstt:first-child{border-left:none;padding-left:0;}
+.ghstt .l{font-size:11px;font-weight:800;letter-spacing:.6px;color:rgba(255,255,255,.75);text-transform:uppercase;white-space:nowrap;}
+.ghstt .v{font-size:26px;font-weight:800;margin-top:6px;line-height:1.1;white-space:nowrap;}
+.ghstt .s{font-size:11.5px;color:rgba(255,255,255,.75);margin-top:5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.ghstt.pos .v{color:#8effc0;}
+.ghstt.pos .l{color:rgba(198,255,222,.85);}
+.ghmini{font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;background:#ffb45c;color:#4d2800;letter-spacing:.2px;white-space:nowrap;}
+.ghfrm{font-size:11.5px;color:rgba(255,255,255,.65);margin-top:16px;border-top:1px solid rgba(255,255,255,.18);padding-top:12px;}
+.ghfrm b{color:#fff;font-weight:800;}
+@media(max-width:560px){.ghstt{min-width:44%;}.ghstt:nth-child(odd){border-left:none;padding-left:0;}}
 @media(max-width:640px){.ggrid{grid-template-columns:1fr;}.ghgrid{max-width:none;}}
 </style></head>
 <body><div id="root"></div>
@@ -276,11 +288,11 @@ async function login(){
   const k=$("lkod").value.trim(), s=$("lsifre").value.trim();
   if(!k||!s){S.err="Kod ve şifre girin.";render();return;}
   S.kod=k;S.sifre=s;S.busy=true;S.err="";renderLogin();
-  try{ const res=await api("data"); if(res&&res.ok){ S.authed=true;S.data=res;S.busy=false; if(res.token)S.tok=res.token; if($("lrem")&&$("lrem").checked){try{localStorage.setItem("pp_kod",k); if(res.token)localStorage.setItem("pp_tok",res.token); localStorage.removeItem("pp_sifre");}catch(e){}} else {try{localStorage.removeItem("pp_kod");localStorage.removeItem("pp_tok");localStorage.removeItem("pp_sifre");}catch(e){}} render(); }
+  try{ const res=await api("data"); if(res&&res.ok){ S.authed=true;S.data=res;S.busy=false; if(res.token)S.tok=res.token; dataKaydet(res); if($("lrem")&&$("lrem").checked){try{localStorage.setItem("pp_kod",k); if(res.token)localStorage.setItem("pp_tok",res.token); localStorage.removeItem("pp_sifre");}catch(e){}} else {try{localStorage.removeItem("pp_kod");localStorage.removeItem("pp_tok");localStorage.removeItem("pp_sifre");}catch(e){}} render(); }
     else { S.busy=false;S.err=(res&&res.error)||"Giriş başarısız.";renderLogin(); } }
   catch(e){ S.busy=false;S.err="Bağlantı hatası.";renderLogin(); }
 }
-async function reload(){ S.loading=true;render(); try{const res=await api("data"); if(res&&res.ok)S.data=res;}catch(e){} S.loading=false;render(); }
+async function reload(){ S.loading=true;render(); try{const res=await api("data"); if(res&&res.ok){S.data=res; dataKaydet(res);}}catch(e){} S.loading=false;render(); }
 async function act(action,extra,okMsg){
   if(S.busy)return; S.busy=true; render();
   try{
@@ -288,14 +300,19 @@ async function act(action,extra,okMsg){
     if(res&&res.ok){
       if(okMsg)toast(okMsg);                          //    onay geldi → "kaydedildi"
       S.busy=false; render();                         // 2) ekranı HEMEN aç, kullanıcı beklemesin
-      api("data").then(r=>{ if(r&&r.ok){ S.data=r; render(); } })  // 3) listeyi arka planda tazele
+      api("data").then(r=>{ if(r&&r.ok){ S.data=r; dataKaydet(r); render(); } })  // 3) listeyi arka planda tazele
                  .catch(()=>{});
       return;
     } else { toast((res&&res.error)||"İşlem başarısız"); }
   }catch(e){ toast("Bağlantı hatası"); }
   S.busy=false; render();
 }
-function logout(){ try{if(S.tok)api("logout");}catch(e){} try{localStorage.removeItem("pp_kod");localStorage.removeItem("pp_sifre");localStorage.removeItem("pp_tok");}catch(e){} S.authed=false;S.data=null;S.kod="";S.sifre="";S.tok="";render(); }
+function logout(){ try{if(S.tok)api("logout");}catch(e){} try{localStorage.removeItem("pp_kod");localStorage.removeItem("pp_sifre");localStorage.removeItem("pp_tok");localStorage.removeItem("pp_cache");}catch(e){} S.authed=false;S.data=null;S.kod="";S.sifre="";S.tok="";render(); }
+function dataKaydet(res){ try{ var c={}; for(var k in res){ if(k!=="token")c[k]=res[k]; } localStorage.setItem("pp_cache",JSON.stringify(c)); }catch(e){ try{localStorage.removeItem("pp_cache");}catch(_){} } }
+function dataOku(){ try{ var s=localStorage.getItem("pp_cache"); return s?JSON.parse(s):null; }catch(e){ return null; } }
+function staleGoster(v){ var el=document.getElementById("staleBar");
+  if(v){ if(!el){ el=document.createElement("div"); el.id="staleBar"; el.style.cssText="position:fixed;top:0;left:0;right:0;z-index:9999;background:#FFF3E0;color:#B26A00;font:600 11px 'Public Sans',system-ui,sans-serif;text-align:center;padding:4px 8px;box-shadow:0 1px 4px rgba(0,0,0,.08);"; el.textContent="Kayıtlı görünüm gösteriliyor — güncel veriler arka planda yükleniyor…"; document.body.appendChild(el); } }
+  else if(el){ el.remove(); } }
 
 const TAKIP_DURUMLAR=["Arandı","Söz Verildi","Ödeme Bekleniyor","Çözüldü"];
 const EMAIL_SABLON=[
@@ -1159,31 +1176,42 @@ function osCalc(){ var a=parseFloat(String((($("os_adet")||{}).value)||"").repla
 function gumrukView(){
   var g=(S.data&&S.data.gumruk)||{konteynerler:[],ozet:{}}; var o=g.ozet||{}; var tl=function(n){return money(n,"₺");};
   var _kntN=0,_kgN=0; (g.konteynerler||[]).forEach(function(k){ if(k.tasima==="Uçak Kargo")_kgN++; else _kntN++; });
-  var _oz2=(S.data&&S.data.senaOzet)||{toplam:0,supheli:0}; var _cari2=(S.data&&S.data.senaCari)||{guncelBakiye:0};
-  var _hOdm=(_cari2.odemeler)||[]; var _hOde=_cari2.odenenToplam||0; var _hKal=_cari2.guncelBakiye||0; var _hBorc=_hKal+_hOde;
+  var _oz2=(S.data&&S.data.senaOzet)||{toplam:0,supheli:0};
+  var _sp=(S.data&&S.data.senaPortal)||{liste:[],bekleyenN:0,bekleyenTL:0,onayliToplam:0,onayliN:0,ard:0,ardBek:0};
   var _hKom=0; (g.konteynerler||[]).forEach(function(kk){ _hKom+=kartKomG(kk); });
-  var _hBek=(((S.data&&S.data.sena)||{}).bekleyen)||[];
-  var _hPct=_hBorc>0?Math.min(Math.round(_hOde/_hBorc*100),100):0;
-  var hero='<div class="ghero"><div style="flex:1;min-width:230px;">'
+  var _hOde=_sp.onayliToplam||0; var _hArd=_sp.ard||0;
+  var _hBorc=_hKom+_hArd; var _hNet=_hBorc-_hOde;
+  var _hPct=_hBorc>0?Math.min(Math.round(_hOde/_hBorc*100),100):(_hOde>0?100:0);
+  var _hRingCol=(_hPct>=100&&_hOde>0)?"#8effc0":"#fff";
+  var _hRingLbl=(_hPct>=100&&_hOde>0)?"borç karşılandı":"ödeme oranı";
+  var _hSonuc=(_hNet>0)
+   ? '<div class="ghstt"><div class="l">Kalan borç</div><div class="v mono">'+tl(_hNet)+'</div><div class="s">ödenecek</div></div>'
+   : '<div class="ghstt pos"><div class="l">Fazla ödeme</div><div class="v mono">'+tl(Math.abs(_hNet))+'</div><div class="s">lehimize</div></div>';
+  var _hArdV=(_hArd>0)?('<span class="mono">'+tl(_hArd)+'</span>'):'<span style="color:rgba(255,255,255,.55);">—</span>';
+  var _hArdS=((_sp.ardBek||0)>0)?('<span class="ghmini">dekont bekleniyor</span> SENA yükleyecek'):((_hArd>0)?'dekontlu kalemler':'kayıt yok');
+  var _hFrm='Hesap: komisyon <b>'+tl(_hKom)+'</b>'+(_hArd>0?(' + SENA ardiyesi <b>'+tl(_hArd)+'</b>'):'')+' − ödenen <b>'+tl(_hOde)+'</b>'+((_sp.ardBek||0)>0?' · ardiye dekontları yüklendikçe hesaba eklenir':'');
+  var hero='<div class="ghero"><div style="flex:1;min-width:260px;">'
    +'<h2>SENA hesap özeti</h2><div class="gsub">'+(o.toplam||0)+' dosya · '+_kntN+' konteyner, '+_kgN+' uçak kargo</div>'
-   +'<div class="ghgrid">'
-   +'<div class="ghchip"><b class="mono">'+tl(_hKom)+'</b><span>komisyon</span></div>'
-   +'<div class="ghchip"><b class="mono">'+tl(_hOde)+'</b><span>ödenen</span></div>'
-   +'<div class="ghchip"><b class="mono">'+tl(_hKal)+'</b><span>kalan borç</span></div>'
-   +'<div class="ghchip"><b>'+_hBek.length+'</b><span>onay bekleyen</span></div>'
-   +'</div></div>'
-   +'<div style="text-align:center;flex-shrink:0;margin:0 auto;"><svg width="120" height="120" viewBox="0 0 128 128">'
-   +'<circle cx="64" cy="64" r="52" fill="none" stroke="rgba(255,255,255,.32)" stroke-width="9" stroke-dasharray="4 8"/>'
-   +'<circle cx="64" cy="64" r="52" fill="none" stroke="#fff" stroke-width="9" transform="rotate(-90 64 64)" stroke-linecap="round" opacity=".9" style="stroke-dasharray:1.8 2.2;stroke-dashoffset:27"/>'
-   +'<text x="64" y="60" text-anchor="middle" fill="#fff" font-size="21" font-weight="800" font-family="Public Sans,sans-serif">%'+_hPct+'</text>'
-   +'<text x="64" y="78" text-anchor="middle" fill="rgba(255,255,255,.85)" font-size="11" font-family="Public Sans,sans-serif">ödeme oranı</text></svg></div></div>';
+   +'<div class="ghstrip">'
+   +'<div class="ghstt"><div class="l">SENA komisyonları</div><div class="v mono">'+tl(_hKom)+'</div><div class="s">e-faturalı hizmet bedelleri</div></div>'
+   +'<div class="ghstt"><div class="l">SENA\'nın ödediği ardiye</div><div class="v">'+_hArdV+'</div><div class="s">'+_hArdS+'</div></div>'
+   +'<div class="ghstt"><div class="l">SENA\'ya ödenen</div><div class="v mono">'+tl(_hOde)+'</div><div class="s">'+(_sp.onayliN||0)+' dekont'+((_sp.bekleyenN||0)>0?(' · <span class="ghmini">'+_sp.bekleyenN+' onay bekliyor</span>'):'')+'</div></div>'
+   +_hSonuc
+   +'</div>'
+   +'<div class="ghfrm">'+_hFrm+'</div>'
+   +'</div>'
+   +'<div style="text-align:center;flex-shrink:0;margin:0 auto;"><svg width="124" height="124" viewBox="0 0 128 128">'
+   +'<circle cx="64" cy="64" r="52" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="9" stroke-dasharray="4 8"/>'
+   +'<circle cx="64" cy="64" r="52" fill="none" stroke="'+_hRingCol+'" stroke-width="9" transform="rotate(-90 64 64)" stroke-linecap="round" opacity=".95" style="stroke-dasharray:1.8 2.2;stroke-dashoffset:27"/>'
+   +'<text x="64" y="60" text-anchor="middle" fill="#fff" font-size="22" font-weight="800" font-family="Public Sans,sans-serif">%'+_hPct+'</text>'
+   +'<text x="64" y="78" text-anchor="middle" fill="rgba(255,255,255,.85)" font-size="11" font-family="Public Sans,sans-serif">'+_hRingLbl+'</text></svg></div></div>';
   var _gkp=S.gumKpiPanel||"";
   var _kkart=function(kid,lbl,val,sub,icon,col,bg){ return '<div class="kpi gklik'+(_gkp===kid?" on":"")+'" data-act="gumKpi" data-k="'+kid+'" style="display:flex;align-items:flex-start;gap:13px;"><div class="ki" style="background:'+bg+';">'+ic(icon,20,col)+'</div><div style="min-width:0;"><div style="color:var(--muted);font-size:11px;font-weight:600;">'+lbl+'</div><div class="mono" style="color:var(--head);font-size:21px;font-weight:800;margin-top:2px;line-height:1.15;">'+val+'</div><div style="font-size:10.5px;font-weight:700;color:'+col+';margin-top:2px;">'+sub+'</div></div><span class="gchev">'+ic("cl",14,"#999")+'</span></div>'; };
   var kpis='<div class="kpis">'
    +kpic("AÇIK DOSYA",String(o.acik||0),"yolda / gümrükte","#DB3A4C","ship","#DB3A4C","rgba(219,58,76,.12)")
    +kpic("TOPLAM SEVKİYAT",String(o.toplam||0),_kntN+" konteyner · "+_kgN+" kargo","#00A7BE","pkg","#00CFE8","rgba(0,207,232,.14)")
    +_kkart("kom","TOPLAM KOMİSYON",tl(_hKom),(_oz2.supheli>0?(tl(_oz2.supheli)+" şüpheli"):"kayıtlar için tıkla"),"cash",(_oz2.supheli>0?"#C0392B":"#DB3A4C"),"rgba(219,58,76,.1)")
-   +_kkart("ode","SENA'YA ÖDENEN",tl(_hOde),_hOdm.length+" dekont · kalan "+tl(_hKal),"bank","#7367F0","rgba(115,103,240,.14)")
+   +_kkart("ode","SENA'YA ÖDENEN",tl(_hOde),((_sp.bekleyenN||0)>0?(_sp.bekleyenN+" kayıt onay bekliyor"):((_sp.onayliN||0)+" dekont · banka kayıtlı")),"bank",((_sp.bekleyenN||0)>0?"#E07B00":"#7367F0"),"rgba(115,103,240,.14)")
   +'</div>';
   var gkpanel='';
   if(_gkp==="kom"){
@@ -1194,9 +1222,17 @@ function gumrukView(){
      +'<div class="row" style="background:var(--card2);"><div class="grow" style="font-size:11.5px;font-weight:800;color:var(--muted);">TOPLAM KOMİSYON</div><div class="mono" style="font-weight:800;font-size:16px;color:#DB3A4C;">'+tl(_hKom)+'</div></div></div>';
   }
   if(_gkp==="ode"){
-    var _orows=_hOdm.map(function(od){ var fpo=fotoParse(od.belge||""); return '<div class="row" style="align-items:center;"><div style="width:36px;height:36px;border-radius:9px;background:rgba(115,103,240,.12);display:flex;align-items:center;justify-content:center;flex:0 0 auto;">'+ic("cash",16,"#7367F0")+'</div><div class="grow" style="min-width:0;margin-left:10px;"><div style="font-weight:700;" class="nowrap">'+esc(od.dekont||"Ödeme")+'</div><div style="font-size:11px;color:var(--muted);" class="nowrap">'+esc([od.tarih,od.not].filter(Boolean).join(" · ")||"—")+'</div></div>'+(fpo.urls.length?'<span style="cursor:pointer;padding:5px;flex:0 0 auto;" data-act="gumFotoAc" data-url="'+esc(fpo.urls[0])+'" data-title="Ödeme dekontu" title="Dekontu gör">'+ic("eye",15,"#3B82F6")+'</span>':'')+'<div class="mono" style="font-weight:800;color:#7367F0;white-space:nowrap;flex:0 0 auto;margin-left:8px;">− '+tl(Math.abs(od.tahsilat))+'</div><span style="cursor:pointer;padding:5px;flex:0 0 auto;margin-left:6px;" data-act="senaOdemeDuzenleAc" data-row="'+od._row+'" title="Düzenle">'+ic("edit",14,"#3B82F6")+'</span><span style="cursor:pointer;padding:5px;flex:0 0 auto;" data-act="senaOdemeSil" data-row="'+od._row+'" title="Sil">'+ic("trash",14,"#EA5455")+'</span></div>'; }).join('')||'<div class="empty">Henüz ödeme dekontu yok. Aşağıdaki "Ödeme / Dekont Ekle" ile başla.</div>';
-    gkpanel='<div class="box gkpanel" style="margin-bottom:16px;"><div class="kph">'+ic("bank",15,"#7367F0")+' Ödeme Kayıtları · '+_hOdm.length+' dekont<span class="x" data-act="gumKpi" data-k="ode">'+ic("x",17,"#999")+'</span></div>'+_orows
-     +'<div class="row" style="background:var(--card2);"><div class="grow" style="font-size:11.5px;font-weight:800;color:var(--muted);">TOPLAM ÖDENEN · kalan borç '+tl(_hKal)+'</div><div class="mono" style="font-weight:800;font-size:16px;color:#7367F0;">'+tl(_hOde)+'</div></div></div>';
+    var _orows=(_sp.liste||[]).map(function(od){ var fpo=fotoParse(od.belge||"");
+      var st=(od.onay==="Onaylandı")?'<span class="pill p-g">Onaylandı</span>':(od.onay==="Reddedildi"?'<span class="pill p-r">Reddedildi</span>':'<button class="btn b-on" data-act="senaPortalOnay" data-row="'+od._row+'" data-durum="Onaylandı">'+ic("check",12,"#28C76F")+' Onayla</button><button class="btn b-no" data-act="senaPortalOnay" data-row="'+od._row+'" data-durum="Reddedildi">'+ic("x",12,"#EA5455")+'</button>');
+      return '<div class="row" style="align-items:center;'+(od.onay==="Onay Bekliyor"?'border-left:3px solid #FF9F43;background:linear-gradient(90deg,rgba(255,159,67,.06),transparent);':'')+'"><div style="width:36px;height:36px;border-radius:9px;background:rgba(115,103,240,.12);display:flex;align-items:center;justify-content:center;flex:0 0 auto;">'+ic("cash",16,"#7367F0")+'</div><div class="grow" style="min-width:0;margin-left:10px;"><div style="font-weight:700;" class="nowrap">'+esc(od.tarih||"Ödeme")+(od.senaNo?' <span style="background:rgba(219,58,76,.12);color:#B02A3A;font-size:10px;font-weight:800;border-radius:5px;padding:2px 7px;">'+esc(od.senaNo)+'</span>':'')+'</div><div style="font-size:11px;color:var(--muted);" class="nowrap">'+esc([od.dosya,od.aciklama].filter(Boolean).join(" · ")||(fpo.urls.length?"dekont ekli":"belge yok"))+'</div></div>'+(fpo.urls.length?'<span style="cursor:pointer;padding:5px;flex:0 0 auto;" data-act="gumFotoAc" data-url="'+esc(fpo.urls[0])+'" data-title="Ödeme dekontu" title="Dekontu gör">'+ic("eye",15,"#3B82F6")+'</span>':'')+'<div class="mono" style="font-weight:800;color:#7367F0;white-space:nowrap;flex:0 0 auto;margin:0 8px;">'+tl(od.tutar)+'</div><div style="flex:0 0 auto;display:flex;gap:4px;align-items:center;">'+st+'</div></div>'; }).join('')||'<div class="empty">Henüz ödeme kaydı yok. Kayıtlar SENA portalından ("Sena Ödeme" defteri) gelir.</div>';
+    gkpanel='<div class="box gkpanel" style="margin-bottom:16px;"><div class="kph">'+ic("bank",15,"#7367F0")+' Ödeme Kayıtları · '+(_sp.liste||[]).length+' kayıt'+((_sp.bekleyenN||0)>0?' · <span style="color:#E07B00;">'+_sp.bekleyenN+' onay bekliyor</span>':'')+'<span class="x" data-act="gumKpi" data-k="ode">'+ic("x",17,"#999")+'</span></div>'+_orows
+     +'<div class="row" style="background:var(--card2);"><div class="grow" style="font-size:11.5px;font-weight:800;color:var(--muted);">TOPLAM ÖDENEN (onaylı)</div><div class="mono" style="font-weight:800;font-size:16px;color:#7367F0;">'+tl(_hOde)+'</div></div></div>';
+  }
+  var spBox="";
+  if((_sp.bekleyenN||0)>0){
+    var _sprows=(_sp.liste||[]).filter(function(od){return od.onay!=="Onaylandı"&&od.onay!=="Reddedildi";}).map(function(od){ var fpo=fotoParse(od.belge||"");
+      return '<div class="row" style="align-items:center;"><div style="width:38px;height:38px;border-radius:9px;background:rgba(115,103,240,.12);display:flex;align-items:center;justify-content:center;flex:0 0 auto;">'+ic("cash",17,"#7367F0")+'</div><div class="grow" style="min-width:0;margin-left:11px;"><div style="font-weight:700;" class="nowrap">'+esc(od.tarih||"")+' · <span class="mono">'+tl(od.tutar)+'</span>'+(od.senaNo?' <span style="background:rgba(219,58,76,.12);color:#B02A3A;font-size:10px;font-weight:800;border-radius:5px;padding:2px 7px;">'+esc(od.senaNo)+'</span>':'')+'</div><div style="font-size:11px;color:var(--muted);" class="nowrap">'+esc([od.dosya,od.aciklama].filter(Boolean).join(" · ")||(fpo.urls.length?"dekont ekli":"belge yok"))+'</div></div>'+(fpo.urls.length?'<span style="cursor:pointer;padding:5px;flex:0 0 auto;" data-act="gumFotoAc" data-url="'+esc(fpo.urls[0])+'" data-title="Ödeme dekontu" title="Dekontu gör">'+ic("eye",15,"#3B82F6")+'</span>':'')+'<button class="btn b-on" data-act="senaPortalOnay" data-row="'+od._row+'" data-durum="Onaylandı">'+ic("check",12,"#28C76F")+' Onayla</button><button class="btn b-no" data-act="senaPortalOnay" data-row="'+od._row+'" data-durum="Reddedildi">'+ic("x",12,"#EA5455")+'</button></div>'; }).join('');
+    spBox='<div class="sec" style="margin-top:22px;">'+ic("bank",13,"#7367F0")+' SENA ÖDEME ONAYLARI<span style="margin-left:8px;background:rgba(255,159,67,.16);color:#E07B00;font-size:10px;font-weight:800;border-radius:20px;padding:2px 9px;letter-spacing:0;text-transform:none;">'+_sp.bekleyenN+' onay bekliyor</span></div><div class="box">'+_sprows+'</div>';
   }
   var _q=S.gumQ||""; var _sort=S.gumSort||"tarih"; var _filt=S.gumFilter||"hepsi";
   var bar='<div style="display:flex;justify-content:space-between;gap:10px;margin:22px 0 10px;align-items:center;flex-wrap:wrap;"><div class="sec" style="margin:0;">'+ic('ship',14,'#DB3A4C')+' Sevkiyat Dosyaları</div>'
@@ -1293,7 +1329,7 @@ function gumrukView(){
       +'<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">'+_oc("TOPLAM BORÇ",_borc,"#5E5873","SENA cari")+_oc("ÖDENEN",_odenen,"#1A9E55",_odm.length+" dekont")+_oc("KALAN BORÇ",_kalan,"#DB3A4C","ödenecek")+'</div>'
       +(_odm.length?('<div class="box">'+_odm.map(_orow).join('')+'</div>'):'<div class="empty" style="padding:18px;">Henüz ödeme dekontu eklenmedi. “Ödeme / Dekont Ekle” ile başla.</div>');
   }
-  return hero+kpis+gkpanel+_senaBox+bar+chips+'<div class="ggrid">'+rows+'</div>'+_foot+ozBox+odemeBox+cariBox;
+  return hero+kpis+gkpanel+spBox+_senaBox+bar+chips+'<div class="ggrid">'+rows+'</div>'+_foot+ozBox+cariBox;
 }
 function gumrukDetayView(){
   var g=(S.data&&S.data.gumruk)||{konteynerler:[]}; var list=g.konteynerler||[]; var k=null;
@@ -2279,6 +2315,7 @@ document.addEventListener("click",async e=>{
   if(a==="konteynerEkleAc"){S.sheet="konteynerForm";S.sheetData={tasima:"Konteyner"};render();return;}
   if(a==="gumFilt"){S.gumFilter=el.getAttribute("data-f");render();return;}
   if(a==="gumKpi"){var _gk=el.getAttribute("data-k");S.gumKpiPanel=(S.gumKpiPanel===_gk?null:_gk);render();return;}
+  if(a==="senaPortalOnay"){var _spr=el.getAttribute("data-row");var _spd=el.getAttribute("data-durum");if(_spd==="Reddedildi"&&!confirm("Bu ödeme kaydı reddedilsin mi?"))return;act("senaPortalOdemeOnay",{row:_spr,durum:_spd},_spd==="Onaylandı"?"Ödeme onaylandı ✓":"Ödeme reddedildi");return;}
   if(a==="gumTipSel"){readKonteynerForm();if(S.sheetData)S.sheetData.tasima=el.getAttribute("data-t");render();return;}
   if(a==="konteynerDuzenleAc"){const id=el.getAttribute("data-id");const g=(S.data&&S.data.gumruk)||{};const k=((g.konteynerler)||[]).find(x=>x.id===id);if(!k){toast("Kayıt bulunamadı");return;}S.sheet="konteynerForm";S.sheetData={edit:true,id:id,no:k.no,tip:k.tip,urun:k.urun,tedarikci:k.tedarikci,gelis:k.gelis,bl:k.bl,beyanname:k.beyanname,liman:k.liman,durum:k.durum,not:k.not,tasima:k.tasima||"Konteyner"};render();return;}
   if(a==="konteynerKaydet"||a==="konteynerGuncelleEt"){const tasima=(S.sheetData&&S.sheetData.tasima)||"Konteyner";const data={no:$("kn_no").value.trim(),tip:$("kn_tip").value.trim(),urun:$("kn_urun").value.trim(),tedarikci:$("kn_ted").value.trim(),bl:$("kn_bl").value.trim(),beyanname:$("kn_bey").value.trim(),liman:$("kn_liman").value.trim(),gelis:$("kn_gelis").value,durum:$("kn_durum").value,not:$("kn_not").value.trim(),senaDekont:($("kn_sena")?$("kn_sena").value.trim():""),tasima:tasima};if(!data.no){toast((tasima==="Uçak Kargo"?"AWB / kargo no":"Konteyner no")+" gerekli");return;}const id=el.getAttribute("data-id");S.sheet=null;S.sheetData=null;if(a==="konteynerKaydet")act("konteynerEkle",{data:data},(tasima==="Uçak Kargo"?"Uçak kargo":"Konteyner")+" eklendi ✓");else act("konteynerGuncelle",{id:id,data:data},"Kayıt güncellendi ✓");return;}
@@ -2449,7 +2486,14 @@ function cekCalendar(){const d=S.data||{};const cek=(d.cekler||[]).filter(c=>c.v
   setTimeout(fetchFX,300);
   const k=(()=>{try{return localStorage.getItem("pp_kod")}catch(e){return null}})();
   const t=(()=>{try{return localStorage.getItem("pp_tok")}catch(e){return null}})();
-  if(t){ S.kod=k||"";S.tok=t;S.authed=true;S.loading=true;render(); api("data").then(res=>{ S.loading=false; if(res&&res.ok){S.data=res; if(res.token)S.tok=res.token; render();} else {S.authed=false;S.tok="";try{localStorage.removeItem("pp_tok");}catch(e){} S.err=(res&&res.error)||"";renderLogin();} }).catch(()=>{ S.loading=false;S.authed=false;renderLogin(); }); }
+  if(t){ S.kod=k||"";S.tok=t;S.authed=true;
+    var _cc=dataOku();
+    if(_cc){ S.data=_cc; S.loading=false; render(); staleGoster(true); }
+    else { S.loading=true; render(); }
+    api("data").then(res=>{ S.loading=false; staleGoster(false);
+      if(res&&res.ok){ S.data=res; if(res.token)S.tok=res.token; dataKaydet(res); render(); }
+      else { S.authed=false;S.tok="";S.data=null; try{localStorage.removeItem("pp_tok");localStorage.removeItem("pp_cache");}catch(e){} S.err=(res&&res.error)||""; renderLogin(); }
+    }).catch(()=>{ S.loading=false; staleGoster(false); if(!_cc){ S.authed=false; renderLogin(); } else { toast("Güncel veriler alınamadı — kayıtlı görünüm gösteriliyor"); } }); }
   else renderLogin();
   if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
 })();
