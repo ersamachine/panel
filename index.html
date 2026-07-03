@@ -260,8 +260,12 @@ function initials(s){s=String(s||"").trim();if(!s)return"P";const p=s.split(/\s+
 
 async function api(action,extra){
   const body=Object.assign({kod:S.kod,sifre:S.sifre,token:S.tok,action:action},extra||{});
+  const t0=Date.now();
   const r=await fetch(window.API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)});
-  return await r.json();
+  const j=await r.json();
+  // V95 ÖLÇÜM: sunucu modül süreleri (F12 → Console'da görünür; Faz 2 önceliklendirmesi için)
+  if(j&&j._sure){ try{ console.log("⏱ "+action+" · ağ+sunucu "+(Date.now()-t0)+"ms · modüller(ms):",JSON.stringify(j._sure)); }catch(_){} }
+  return j;
 }
 /* ===== ERSA LAZER (AYRI Apps Script web app) — adresi config.js'e yaz: window.LAZER_API_URL ===== */
 async function lazerApi(action,extra){
