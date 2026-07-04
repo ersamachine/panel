@@ -653,7 +653,21 @@ function ekstreView(){
    +'<div style="display:flex;gap:24px;margin-top:12px;flex-wrap:wrap;"><div><div style="font-size:10px;color:var(--muted);">BAKİYE'+(cekTop360>0?' (çek düşülmüş)':'')+'</div><div class="mono" style="font-size:19px;font-weight:800;color:'+(bakNet>0?"#EA5455":"#28C76F")+';">'+money(bakNet)+'</div></div><div><div style="font-size:10px;color:var(--muted);">FATURA</div><div class="mono" style="font-size:14px;font-weight:700;">'+money(o.toplamFatura)+'</div></div><div><div style="font-size:10px;color:var(--muted);">TAHSİLAT</div><div class="mono" style="font-size:14px;font-weight:700;color:#28C76F;">'+money(o.toplamTahsilat)+'</div></div>'+(cekTop360>0?'<div><div style="font-size:10px;color:var(--muted);">PORTFÖY ÇEK</div><div class="mono" style="font-size:14px;font-weight:700;color:#3B82F6;">−'+money(cekTop360)+'</div></div>':'')+'</div>'
    +(email?'<div style="font-size:11px;color:var(--muted);margin-top:8px;">'+esc(email)+(tel?' · '+esc(tel):'')+'</div>':(tel?'<div style="font-size:11px;color:var(--muted);margin-top:8px;">'+esc(tel)+'</div>':''))
    +acts+'</div>'
+   +_cariUyari(e,o)
    +_grid+_panel;
+}
+// V100: Cari Özet toplamı ile hareket (Faturalar/Ödemeler) toplamı uyuşmuyorsa uyarı bandı
+function _cariUyari(e,o){
+  if(e._loading||e.hareketFatura==null) return '';
+  const fFark=Math.round((Number(o.toplamFatura)||0)-(Number(e.hareketFatura)||0));
+  const tFark=Math.round((Number(o.toplamTahsilat)||0)-(Number(e.hareketTahsilat)||0));
+  if(Math.abs(fFark)<1 && Math.abs(tFark)<1) return '';
+  let msg=[];
+  if(Math.abs(fFark)>=1) msg.push('fatura tarafında '+money(Math.abs(fFark))+' '+(fFark>0?'hareketlerde görünmeyen kayıt var':'fazla hareket kaydı var'));
+  if(Math.abs(tFark)>=1) msg.push('tahsilat tarafında '+money(Math.abs(tFark))+' fark var');
+  return '<div class="box" style="padding:12px 15px;margin-bottom:14px;border:1.5px solid rgba(255,159,67,.55);background:rgba(255,159,67,.09);display:flex;align-items:flex-start;gap:10px;">'+ic('alert',18,'#E07B00')
+   +'<div style="min-width:0;"><div style="font-weight:800;color:#E07B00;font-size:12.5px;">CARİ TUTARSIZLIĞI TESPİT EDİLDİ</div>'
+   +'<div style="font-size:11.5px;color:var(--ink);margin-top:3px;">Cari Özet toplamı ile hareket kayıtları uyuşmuyor: '+msg.join(' · ')+'. Olası sebep: silinen/düzenlenen bir siparişin eski faturası ya da muhasebeden elle girilen kayıt. Faturalar sekmesini kontrol edin.</div></div></div>';
 }
 function sifreView(){
   const d=S.data||{};
