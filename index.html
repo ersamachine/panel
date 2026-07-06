@@ -2340,7 +2340,7 @@ function sheetOvl(){
   const cpb=pre.pb||"$"; const isTL=(cpb==="₺"); const fxn=fxNum();
   const _t0=parseFloat(String(pre.tutar||"").toString().replace(",","."))||0;
   return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">'+(ed?'Tahsilat Düzenle':'Tahsilat Girişi')+'</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
-   +'<div style="font-size:11.5px;color:var(--muted);margin-bottom:12px;">"Ödemeler" sayfasına işlenir → cari bakiye düşer.</div>'
+   +'<div style="font-size:11.5px;color:var(--muted);margin-bottom:12px;">"Ödemeler" sayfasına işlenir → cari bakiye düşer. <b style="color:var(--head);">Taksitli satışı olan müşteride tutar, en eski açık taksitten otomatik düşülür</b> (elle taksit seçmek gerekmez).</div>'
    +'<label class="lbl">Müşteri</label><input id="t_mus" class="field" '+(ed?'readonly style="opacity:.65;"':'')+' value="'+esc(pre.musteri||"")+'" placeholder="Müşteri adı (cariyle aynı)">'
    +'<label class="lbl">Para Birimi</label><div style="display:flex;gap:8px;margin-bottom:2px;"><button type="button" data-act="tPb" data-pb="$" class="btn '+(isTL?"b-w":"b-on")+'" style="flex:1;padding:9px;">$ USD</button><button type="button" data-act="tPb" data-pb="₺" class="btn '+(isTL?"b-on":"b-w")+'" style="flex:1;padding:9px;">₺ TL</button></div>'
    +'<label class="lbl">Tutar ('+cpb+')</label><input id="t_tut" class="field" inputmode="decimal" data-tcalc="1" value="'+esc(pre.tutar||"")+'" placeholder="0">'
