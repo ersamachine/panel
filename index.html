@@ -2213,12 +2213,24 @@ function sheetOvl(){
      +'</div>';
   }
   if(S.sheet==="foto"){
+    /* V108: TAM EKRAN dekont/foto görüntüleyici — Drive'da aç KALDIRILDI, sağa/sola döndürme eklendi */
     const x=S.sheetData||{}; const id=driveId(x.url);
-    const big=id?('https://drive.google.com/thumbnail?id='+id+'&sz=w1600'):x.url;
+    const big=id?('https://drive.google.com/thumbnail?id='+id+'&sz=w2000'):x.url;
     const dl=id?('https://drive.google.com/uc?export=download&id='+id):x.url;
-    return '<div class="ovl"><div class="modal" data-stop="1" style="max-width:560px;padding:0;overflow:hidden;"><div class="mh" style="padding:13px 16px;margin:0;border-bottom:1px solid var(--line);"><div class="t">'+esc(x.title||"Fotoğraf")+'</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
-     +'<div style="background:#111;display:flex;align-items:center;justify-content:center;min-height:300px;max-height:62vh;overflow:auto;"><img src="'+esc(big)+'" referrerpolicy="no-referrer" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';" style="max-width:100%;max-height:62vh;display:block;"><div style="display:none;flex-direction:column;align-items:center;gap:8px;color:#888;padding:50px;text-align:center;">'+ic("img",36,"#888")+'<span style="font-size:12px;">Fotoğraf yüklenemedi. Drive izni "bağlantısı olan herkes" olmalı.</span></div></div>'
-     +'<div style="display:flex;gap:9px;padding:14px 16px;"><a href="'+esc(dl)+'" target="_blank" rel="noopener" class="btnred" style="flex:1;margin-top:0;text-decoration:none;">'+ic('dl',16,'#fff')+' İndir</a><a href="'+esc(x.url)+'" target="_blank" rel="noopener" class="btn" style="flex:0 0 auto;padding:0 16px;display:flex;align-items:center;gap:6px;text-decoration:none;">'+ic('ext',14,'#3B82F6')+' Drive\'da aç</a></div>'
+    const rot=((S.fotoRot||0)%360+360)%360; const swap=(rot%180)!==0;
+    const imW=swap?'calc(100vh - 170px)':'calc(100vw - 48px)';
+    const imH=swap?'calc(100vw - 48px)':'calc(100vh - 170px)';
+    return '<div class="ovl" style="z-index:300;align-items:stretch;justify-content:flex-start;flex-direction:column;padding:0;background:rgba(8,8,10,.94);">'
+     +'<div style="display:flex;align-items:center;gap:10px;background:#1b1b1b;color:#fff;padding:10px 14px;flex-shrink:0;">'
+       +'<button class="btn" data-act="sheetclose" style="background:#2a2a2a;color:#fff;padding:9px 13px;">'+ic('cl',15,'#fff')+' Geri</button>'
+       +'<div style="flex:1;min-width:0;font-weight:700;font-size:13.5px;" class="nowrap">'+esc(x.title||"Belge")+'</div>'
+       +'<button class="btn" data-act="fotoRotL" title="Sola döndür" style="background:#2a2a2a;color:#fff;padding:9px 13px;">↺ Sol</button>'
+       +'<button class="btn" data-act="fotoRotR" title="Sağa döndür" style="background:#2a2a2a;color:#fff;padding:9px 13px;">↻ Sağ</button>'
+       +'<a href="'+esc(dl)+'" target="_blank" rel="noopener" class="btnred" style="width:auto;margin:0;padding:9px 15px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">'+ic('dl',15,'#fff')+' İndir</a>'
+     +'</div>'
+     +'<div style="flex:1;display:flex;align-items:center;justify-content:center;overflow:auto;padding:12px;">'
+       +'<img id="fotoImg" src="'+esc(big)+'" referrerpolicy="no-referrer" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';" style="max-width:'+imW+';max-height:'+imH+';display:block;transform:rotate('+rot+'deg);transition:transform .25s;box-shadow:0 10px 50px rgba(0,0,0,.6);">'
+       +'<div style="display:none;flex-direction:column;align-items:center;gap:8px;color:#888;padding:50px;text-align:center;">'+ic("img",36,"#888")+'<span style="font-size:12px;">Görsel yüklenemedi. Drive izni "bağlantısı olan herkes" olmalı.</span></div>'
      +'</div></div>';
   }
   if(S.sheet==="stokForm"){
@@ -2427,7 +2439,8 @@ document.addEventListener("click",async e=>{
   if(a==="stokKaydet"){const data={tarih:$("sk_tar").value,ad:$("sk_ad").value.trim(),adet:$("sk_adet").value,fiyat:$("sk_fiyat").value};if(!data.ad||!(+data.adet>0)||!(+data.fiyat>0)){toast("Ad, adet ve birim fiyat gerekli");return;}S.sheet=null;S.sheetData=null;act("stokEkle",{data:data},"Stok eklendi");return;}
   if(a==="stokDuzenleKaydet"){const row=el.getAttribute("data-row");const data={tarih:$("sk_tar").value,ad:$("sk_ad").value.trim(),adet:$("sk_adet").value,fiyat:$("sk_fiyat").value};if(!data.ad||!(+data.adet>0)||!(+data.fiyat>0)){toast("Ad, adet ve birim fiyat gerekli");return;}S.sheet=null;S.sheetData=null;act("stokGuncelle",{row:row,data:data},"Stok güncellendi");return;}
   if(a==="stokSil"){const row=el.getAttribute("data-row");if(!confirm("Bu stok kaydı silinsin mi?"))return;act("stokSil",{row:row},"Stok silindi");return;}
-  if(a==="fotoBuyut"){S.sheet="foto";S.sheetData={url:el.getAttribute("data-url"),title:el.getAttribute("data-title")};render();return;}
+  if(a==="fotoBuyut"){S.sheet="foto";S.fotoRot=0;S.sheetData={url:el.getAttribute("data-url"),title:el.getAttribute("data-title")};render();return;}
+  if(a==="fotoRotL"||a==="fotoRotR"){ S.fotoRot=((((S.fotoRot||0)+(a==="fotoRotR"?90:-90))%360)+360)%360; const im=document.getElementById("fotoImg"); if(im){ const rot=S.fotoRot, swap=(rot%180)!==0; im.style.maxWidth=swap?"calc(100vh - 170px)":"calc(100vw - 48px)"; im.style.maxHeight=swap?"calc(100vw - 48px)":"calc(100vh - 170px)"; im.style.transform="rotate("+rot+"deg)"; } return; }
   if(a==="dekontGor"){const urls=(el.getAttribute("data-urls")||"").split(/\s+/).filter(Boolean);S.sheet="dekontView";S.sheetData={urls:urls,idx:0,title:el.getAttribute("data-title")||"Dekont"};render();return;}
   if(a==="dekontNav"){if(S.sheetData)S.sheetData.idx=+el.getAttribute("data-idx");render();return;}
   if(a==="portalSifreAc"){S.sheet="portalSifre";S.sheetData={musteri:el.getAttribute("data-musteri"),kod:el.getAttribute("data-kod"),sifre:el.getAttribute("data-sifre")};render();return;}
