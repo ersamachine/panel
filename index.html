@@ -451,6 +451,11 @@ function render(){
    +'<nav class="bottomnav">'+bnav+'</nav></div>'
    + (S.sheet?sheetOvl():"")
    + ((S.aiEdit&&S.aiEdit.open)?aiEditView():"");
+  /* V103: pdfview belgesi iframe'e document.write ile yazılır (srcdoc değil) */
+  if(S.sheet==="pdfview"&&S.sheetData&&S.sheetData.doc){
+    var _pf=document.getElementById("pdfframe");
+    if(_pf){ try{ var _pd=_pf.contentDocument||(_pf.contentWindow&&_pf.contentWindow.document); if(_pd){ _pd.open(); _pd.write(S.sheetData.doc); _pd.close(); } }catch(_e){} }
+  }
 }
 // eski base64 logo kaldırıldı — wordmark (.wm) kullanılıyor
 function renderLogin(){
@@ -2148,10 +2153,11 @@ function sheetOvl(){
     const _title=x.src?'Fiyat Teklifi':(x.teklif?'Fiyat Teklifi':'Cari Ekstre');
     const _actions=x.src
       ? '<a class="btnred" href="'+esc(x.driveUrl||x.src)+'" target="_blank" rel="noopener" style="width:auto;margin:0;padding:9px 15px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">'+ic('ext',15,'#fff')+' Yeni sekmede / indir</a>'
-      : '<button class="btnred" data-act="pdfIndir" style="width:auto;margin:0;padding:9px 15px;">'+ic('dl',15,'#fff')+' İndir (PDF)</button>'+(x.teklif?'<button class="btn b-on" data-act="aiPdfMail" style="width:auto;margin:0;padding:9px 15px;">'+ic('send',15,'#3B82F6')+' Mail Gönder</button>':'');
+      : '<button class="btn" data-act="pdfYeniSekme" style="background:#2a2a2a;color:#fff;padding:9px 13px;">'+ic('ext',14,'#fff')+' Yeni sekme</button><button class="btnred" data-act="pdfIndir" style="width:auto;margin:0;padding:9px 15px;">'+ic('dl',15,'#fff')+' İndir (PDF)</button>'+(x.teklif?'<button class="btn b-on" data-act="aiPdfMail" style="width:auto;margin:0;padding:9px 15px;">'+ic('send',15,'#3B82F6')+' Mail Gönder</button>':'');
+    /* V103: srcdoc yerine boş iframe + render sonrası document.write (bazı tarayıcı/eklenti kombinasyonları srcdoc'u buduyor → boş gri ekran) */
     const _frame=x.src
       ? '<iframe id="pdfframe" src="'+esc(x.src)+'" allow="autoplay" style="flex:1;width:100%;border:none;background:#54585e;display:block;"></iframe>'
-      : '<iframe id="pdfframe" srcdoc="'+esc(x.doc||"")+'" style="flex:1;width:100%;border:none;background:#54585e;display:block;"></iframe>';
+      : '<iframe id="pdfframe" style="flex:1;width:100%;border:none;background:#54585e;display:block;"></iframe>';
     return '<div class="ovl" style="z-index:300;align-items:stretch;justify-content:flex-start;flex-direction:column;padding:0;background:rgba(10,10,12,.72);">'
      +'<div style="display:flex;align-items:center;gap:10px;background:#1b1b1b;color:#fff;padding:10px 14px;flex-shrink:0;">'
        +'<button class="btn" data-act="sheetclose" style="background:#2a2a2a;color:#fff;border-color:#3a3a3a;padding:9px 13px;">'+ic('cl',15,'#fff')+' Geri</button>'
@@ -2449,6 +2455,7 @@ document.addEventListener("click",async e=>{
   if(a==="ekstreTkToggle"){ S.ekstreTk=(S.ekstreTk===false); render(); return; }
   if(a==="ekstrePdfYap"){ const tk=S.ekstreTk!==false; S.sheet=null; render(); printEkstre(tk); return; }
   if(a==="pdfIndir"){ const f=document.getElementById("pdfframe"); try{ if(f&&f.contentWindow&&f.contentWindow.indirPDF){ f.contentWindow.indirPDF(); } else { toast("PDF hazır değil, birkaç saniye bekleyip tekrar deneyin"); } }catch(_){ toast("İndirme başlatılamadı"); } return; }
+  if(a==="pdfYeniSekme"){ const dcs=(S.sheetData&&S.sheetData.doc)||""; if(!dcs){toast("Belge hazır değil");return;} const w=window.open("","_blank"); if(!w){toast("Tarayıcı yeni sekmeyi engelledi");return;} try{ w.document.open(); w.document.write(dcs); w.document.close(); }catch(_e){ toast("Yeni sekmede açılamadı"); } return; }
   if(a==="gecikenKaldir"){act("gecikenKaldir",{row:el.getAttribute("data-row")},"Kaldırıldı");return;}
   if(a==="kagitUrunAc"){S.sheet="kagitUrun";S.sheetData={};render();return;}
   if(a==="kagitUrunDuzenleAc"){const row=el.getAttribute("data-row");const p=((S.data&&S.data.kagit)||[]).find(x=>String(x._row)===String(row));if(!p){toast("Ürün bulunamadı");return;}S.sheet="kagitUrun";S.sheetData={edit:true,row:row,kalinlik:p.kalinlik,cins:p.cins,ebat:p.ebat,birim:p.birim,stok:p.stok,fiyat:p.fiyat,pb:p.pb,durum:p.durum};render();return;}
