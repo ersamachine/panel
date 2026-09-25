@@ -2846,7 +2846,7 @@ function grpWrap(name,inner,hasActive){var closed=grpClosed(name)&&!hasActive;re
 function menuCol(){try{return localStorage.getItem("pp_menuCol")==="1";}catch(e){return false;}}
 function menuColToggle(){try{localStorage.setItem("pp_menuCol",menuCol()?"0":"1");}catch(e){}}
 function buildNav(){var html=NAVGROUPS.map(g=>{const items=g[1].filter(id=>tabMeta(id)&&canSee(id));if(!items.length)return"";const hasActive=items.indexOf(S.tab)>=0;const inner=items.map(id=>{const t=tabMeta(id);const on=S.tab===id;const b=badgeOf(id);return '<div class="ni'+(on?' on':'')+'" data-tab="'+id+'">'+ic(t[2],17,on?'#fff':'')+' <span>'+t[1]+'</span>'+(b?'<span class="bd" style="background:'+b[1]+';color:'+b[2]+';">'+b[0]+'</span>':'')+'</div>';}).join('');return grpWrap(g[0],inner,hasActive);}).join('');
-  if(canSee('lz_dash')){
+  if(false&&canSee('lz_dash')){   /* V120: ERSA Lazer menüden kaldırıldı — geri açmak için false&& sil */
     var lzActive=String(S.tab).indexOf('lz_')===0; var open=S.lzNavOpen||lzActive;
     var o=(S.lazer&&S.lazer.ozet)||{}; var pbd=(o.acik||0)+(o.bekleyenCizim||0);
     var lzHtml='';
