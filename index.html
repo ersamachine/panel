@@ -746,7 +746,8 @@ function ekstreView(){
         +'<div style="padding:12px 15px 4px;font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--muted);border-top:1px solid var(--line);">3. MÜŞTERİYE SATIŞLAR</div>'+_srows+_stop
         +'<div style="padding:10px 15px;font-size:10.5px;color:var(--muted);border-top:1px solid var(--line);">Bu bölüm ayrı defterde ("Ortak Satış" sayfası) tutulur — Purix carisine ve diğer hesaplara dokunmaz.</div>';
     }
-    ortakAct='<button class="btn b-on" data-act="ortakSatisAc" style="padding:4px 10px;font-size:10.5px;flex:0 0 auto;">'+ic('plus',11,'#28C76F')+' Satış</button>';
+    ortakAct='<button class="btn b-w" data-act="ortakSatisPdf" style="padding:4px 10px;font-size:10.5px;flex:0 0 auto;">'+ic('doc',11,'#7367F0')+' PDF</button>'
+      +'<button class="btn b-on" data-act="ortakSatisAc" style="padding:4px 10px;font-size:10.5px;flex:0 0 auto;">'+ic('plus',11,'#28C76F')+' Satış</button>';
   }
   var SECARR=[
    {k:"karne",ic:"chart",col:"#FF3131",lbl:"Risk Karnesi",b:0,act:"",c:karneKart(e.karne)},
@@ -977,6 +978,51 @@ function printEkstre(tk){
    +'</scr'+'ipt>'
    +'</body></html>';
   S.sheet="pdfview"; S.sheetData={doc:doc, ad:e.musteri}; render();
+}
+function printOrtakSatis(){   /* V118: Purix ortak satış raporu — ekstre şablonuyla aynı tasarım */
+  const os=(S.data&&S.data.ortakSatis)||null;
+  if(!os||!(os.satislar||[]).length){toast("Henüz ortak satış kaydı yok");return;}
+  const oz=os.ozet||{};
+  const M=n=>"$"+Math.round(Number(n)||0).toLocaleString("tr-TR");
+  const t0=new Date(), tg=("0"+t0.getDate()).slice(-2)+"."+("0"+(t0.getMonth()+1)).slice(-2)+"."+t0.getFullYear();
+  const sats=(os.satislar||[]).slice().reverse();
+  let rows="", tAdet=0, tSat=0, tMal=0, tKar=0;
+  sats.forEach(x=>{ const ad2=Number(x.adet)||0, bs=Number(x.birimSatis)||0, bm=Number(x.birimMaliyet)||0, kr=Number(x.kar)||0;
+    tAdet+=ad2; tSat+=ad2*bs; tMal+=ad2*bm; tKar+=kr;
+    rows+='<tr><td class="tar">'+esc(x.tarih||"")+'</td>'
+      +'<td><b>'+esc(x.musteri||"")+'</b><div style="font-size:8.5px;color:#8a9099;">'+esc(x.makine||"")+(x.not?' · '+esc(x.not):'')+'</div></td>'
+      +'<td class="r">'+ad2+'</td><td class="r">'+M(bm)+'</td><td class="r">'+M(bs)+'</td>'
+      +'<td class="r '+(kr>=0?'alacak':'borc')+'">'+M(kr)+'</td>'
+      +'<td><span class="pill"'+(x.durum==="Tahsil edildi"?' style="background:#e3f8ec;color:#1d7a4b;"':'')+'>'+esc(String(x.durum||"Bekliyor").toLocaleUpperCase("tr"))+'</span></td></tr>'; });
+  const marj=tSat>0?Math.round(tKar/tSat*1000)/10:0;
+  let prows="";
+  (os.partiler||[]).forEach(p=>{ prows+='<tr><td class="tar">'+esc(p.tarih||"")+'</td><td>'+esc(p.makine||"")+'</td><td class="r">'+(Number(p.adet)||0)+'</td><td class="r">'+M(p.birim)+'</td><td class="r">'+(Number(p.satilan)||0)+'</td><td class="r bk">'+(Number(p.kalan)||0)+'</td></tr>'; });
+  const doc='<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ortak Satış Raporu · '+esc(ORTAK_MUSTERI)+'</title>'
+   +'<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">'
+   +'<style>'+EKSTRE_CSS+'</style></head><body>'
+   +'<div class="page">'
+     +'<div class="lh"><div class="band"><div class="logo"><span class="wm">ersa machinery</span><span class="est">ESTD 2021</span></div></div><div class="title">ORTAK SATIŞ<br>RAPORU</div><div class="tab"></div></div>'
+     +'<div class="accent"></div>'
+     +'<div class="body">'
+       +'<div class="row1"><div class="cust"><div class="lbl">ORTAK TİCARET</div><div class="nm">'+esc(ORTAK_MUSTERI)+'</div><div class="ct">Makine maliyetleri ortak defterden · kâr = adet × (satış − maliyet)</div></div>'
+       +'<div class="meta">Rapor tarihi: <b>'+tg+'</b><br>Para birimi: <b>USD ($)</b><br>Dönem: <b>Tüm satışlar</b></div></div>'
+       +'<div class="sum"><div class="c"><span>Toplam Satış</span><b>'+M(tSat)+'</b></div><div class="c"><span>Satılan Maliyeti</span><b>'+M(tMal)+'</b></div><div class="c bak"><span>Toplam Kâr · %'+String(marj).replace(".",",")+' marj</span><b>'+M(tKar)+'</b></div></div>'
+       +'<div class="sh">Satışlar ('+sats.length+' kayıt · '+tAdet+' adet)</div>'
+       +'<table><thead><tr><th style="width:70px">Tarih</th><th>Müşteri / Makine</th><th class="r">Adet</th><th class="r">B.Maliyet</th><th class="r">B.Satış</th><th class="r">Kâr</th><th style="width:86px">Durum</th></tr></thead><tbody>'+rows+'</tbody>'
+       +'<tfoot><tr><td colspan="2">TOPLAM</td><td class="r">'+tAdet+'</td><td class="r">'+M(tMal)+'</td><td class="r">'+M(tSat)+'</td><td class="r alacak">'+M(tKar)+'</td><td></td></tr></tfoot></table>'
+       +(prows?'<div class="tkblock"><div class="sh">Makine Havuzu ('+(Number(oz.kalanAdet)||0)+' adet stokta)</div><table class="tk"><thead><tr><th style="width:70px">Tarih</th><th>Makine</th><th class="r">Adet</th><th class="r">B.Maliyet</th><th class="r">Satılan</th><th class="r">Kalan</th></tr></thead><tbody>'+prows+'</tbody></table></div>':'')
+       +'<div class="note">Bu rapor '+esc(ORTAK_MUSTERI)+' ile yürütülen ortak ticaretin ayrı defter kaydıdır; cari hesap ekstresinden bağımsızdır.</div>'
+     +'</div>'
+     +'<div class="botbar"><div>info@ersamachinery.com</div><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.4 12 4l9 7.4"/><path d="M5.5 9.8V20h13V9.8"/></svg><div>www.ersamachinery.com</div></div>'
+   +'</div>'
+   +'<scr'+'ipt src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js"></scr'+'ipt>'
+   +'<scr'+'ipt>var FN='+JSON.stringify("Ortak-Satis-Raporu-"+String(ORTAK_MUSTERI).replace(/[^\wÀ-ſ -]/g,"").trim()+".pdf")+';'
+     +'function fitp(){var p=document.querySelector(".page");if(!p)return;p.style.zoom=1;var pw=p.offsetWidth,vw=document.documentElement.clientWidth;p.style.zoom=Math.min(1,vw/pw);}'
+     +'window.addEventListener("resize",fitp);window.addEventListener("load",fitp);setTimeout(fitp,250);setTimeout(fitp,1200);'
+     +'function indirPDF(){if(typeof html2pdf==="undefined"){alert("PDF hazırlanıyor, birkaç saniye sonra tekrar deneyin.");return;}var p=document.querySelector(".page");var z=p.style.zoom;p.style.zoom=1;html2pdf().set({margin:0,filename:FN,image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff"},jsPDF:{unit:"mm",format:"letter",orientation:"portrait"},pagebreak:{mode:["css","legacy"],avoid:["tr",".sum",".sh",".tkblock",".note"]}}).from(p).save().then(function(){p.style.zoom=z;}).catch(function(){p.style.zoom=z;});}'
+   +'</scr'+'ipt>'
+   +'</body></html>';
+  S.sheet="pdfview"; S.sheetData={doc:doc, ad:ORTAK_MUSTERI+" · Ortak Satış"}; render();
 }
 function kutuCariPdf(ad){
   const kt=(S.data&&S.data.kutu)||{};
@@ -2582,6 +2628,7 @@ document.addEventListener("click",async e=>{
   if(a==="sifreKaydet"){const txt=$("sf_txt").value;if(!txt.trim()){toast("Şifre yazın");return;}const row=el.getAttribute("data-row");S.sheet=null;S.sheetData=null;act("sifreYanitla",{row:row,msifre:txt,durum:"Verildi"},"Şifre gönderildi");return;}
   if(a==="sifreReddet"){const row=el.getAttribute("data-row");S.sheet=null;S.sheetData=null;act("sifreYanitla",{row:row,durum:"Reddedildi"},"Reddedildi");return;}
   /* V116 · ortak satış (yalnız Purix kartından açılır) */
+  if(a==="ortakSatisPdf"){printOrtakSatis();return;}
   if(a==="ortakSatisAc"){S.sheet="ortakSatisForm";S.sheetData={};render();setTimeout(function(){try{ortakKar();}catch(e){}},50);return;}
   if(a==="ortakSatisDuzenleAc"){const row=el.getAttribute("data-row");const _o=(((S.data&&S.data.ortakSatis)||{}).satislar||[]).find(function(x){return String(x._row)===String(row);});if(!_o){toast("Satış bulunamadı");return;}S.sheet="ortakSatisForm";var _tf=String(_o.tarih||"");var _tm=_tf.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);if(_tm)_tf=_tm[3]+"-"+("0"+_tm[2]).slice(-2)+"-"+("0"+_tm[1]).slice(-2);S.sheetData={edit:true,row:row,oid:_o.oid,musteri:_o.musteri,adet:String(_o.adet),birimSatis:String(_o.birimSatis),tarih:_tf,durum:_o.durum,not:_o.not};render();setTimeout(function(){try{ortakKar();}catch(e){}},50);return;}
   if(a==="ortakSatisKaydet"){
