@@ -379,7 +379,8 @@ function staleGoster(v){ var el=document.getElementById("staleBar");
 /* ===== V96 MODÜLER YÜKLEME (Faz 2) =====
    Açılışta sadece çekirdek (dataCore) gelir; modüller sekmeye girince / arka planda dataModul ile yüklenir.
    Aksiyonlar yalnız kendi modülünü tazeler (ACT_MODUL) — eşleşme yoksa çekirdek tazelenir. */
-var MODUL_ADLARI=["duyurular","aiTeklifler","kent","stok","gumruk","senaCari","senaOzet","sena","senaPortal","kutu","kagit","kagitTalepler","ozelSiparis","yapilacak","gelecekPara"];
+var MODUL_ADLARI=["duyurular","aiTeklifler","kent","stok","gumruk","senaCari","senaOzet","sena","senaPortal","kutu","kagit","kagitTalepler","ozelSiparis","yapilacak","gelecekPara","ortakSatis"];   /* V116: Purix ortak satış */
+var ORTAK_MUSTERI="Purix analiz cihazları";   // V116: ortak satış YALNIZ bu müşterinin kartında görünür
 var TAB_MODUL={duyuru:["duyurular"],teklif:["aiTeklifler"],aiteklif:["aiTeklifler"],kent:["kent"],stok:["stok"],gumruk:["gumruk","senaCari","senaOzet","sena","senaPortal"],ozelsiparis:["ozelSiparis","gelecekPara"],yapilacak:["yapilacak"],kutu:["kutu"],kagit:["kagit","kagitTalepler"]};
 var ACT_MODUL={
   duyuruEkle:["duyurular"],duyuruDurum:["duyurular"],duyuruSil:["duyurular"],
@@ -397,7 +398,8 @@ var ACT_MODUL={
   senaOnay:["sena","gumruk","senaOzet","senaPortal"],senaOde:["sena","gumruk","senaOzet","senaCari"],
   senaCariEkle:["senaCari"],senaCariSil:["senaCari"],
   senaOdemeEkle:["senaPortal","senaCari"],senaOdemeSil:["senaPortal","senaCari"],senaOdemeGuncelle:["senaPortal","senaCari"],
-  senaPortalOdemeOnay:["senaPortal"]
+  senaPortalOdemeOnay:["senaPortal"],
+  ortakSatisEkle:["ortakSatis"],ortakSatisGuncelle:["ortakSatis"],ortakSatisSil:["ortakSatis"]   /* V116 */
 };
 function dataMerge(res){ if(!res)return; if(!S.data)S.data={}; for(var kk in res){ if(kk==="token"||kk==="_sure")continue; S.data[kk]=res[kk]; } if(res.token)S.tok=res.token; }
 function modulYukle(mods,sonra){ S._modBekle=S._modBekle||{};
@@ -713,6 +715,39 @@ function ekstreView(){
   const tahAct='<button class="btn b-on" data-act="tahsilatPre" data-musteri="'+esc(m)+'" data-tutar="" style="padding:4px 10px;font-size:10.5px;flex:0 0 auto;">'+ic('plus',11,'#28C76F')+' Ekle</button>';
   const sipAct='<button class="btn b-on" data-act="siparisEkleAc" data-musteri="'+esc(m)+'" style="padding:4px 10px;font-size:10.5px;flex:0 0 auto;">'+ic('plus',11,'#28C76F')+' Ekle</button>';
   const _bd=(arr)=>(arr||[]).length;
+  /* ===== V116 · ORTAK SATIŞ & KÂR — YALNIZ Purix kartında; diğer müşterilere/carilere dokunmaz ===== */
+  var _os=(S.data&&S.data.ortakSatis)||null; var ortakInner="",ortakAct="",_osN=0;
+  if(m===ORTAK_MUSTERI){
+    if(!_os){ ortakInner='<div class="empty">Ortak satış verisi yükleniyor…</div>'; modulYukle(["ortakSatis"]); }
+    else{
+      var _oz=_os.ozet||{}; _osN=(_os.satislar||[]).length;
+      var _stat=function(l,v,c,s2){return '<div style="flex:1;min-width:140px;padding:12px 15px;border-right:1px solid var(--line);"><div style="font-size:9.5px;color:var(--muted);font-weight:700;letter-spacing:.4px;text-transform:uppercase;">'+l+'</div><div class="mono" style="font-size:17px;font-weight:800;color:'+(c||'var(--head)')+';margin-top:3px;">'+v+'</div>'+(s2?'<div style="font-size:10px;color:var(--muted);margin-top:1px;">'+s2+'</div>':'')+'</div>';};
+      var _kpi='<div style="display:flex;flex-wrap:wrap;border-bottom:1px solid var(--line);">'
+        +_stat("Makine Havuzu",(_oz.havuzAdet||0),null,(_os.partiler||[]).length+" parti · maliyet "+money(_oz.havuzMaliyet||0))
+        +_stat("Satılan",(_oz.satilanAdet||0)+" / "+(_oz.havuzAdet||0),"#7367F0","kalan "+(_oz.kalanAdet||0)+" makine")
+        +_stat("Toplam Satış",money(_oz.satisToplam||0),"#3B82F6",_osN+" satış")
+        +_stat("Toplam Kâr",money(_oz.kar||0),((_oz.kar||0)>=0?"#28C76F":"#EA5455"),"marj %"+(_oz.marj!=null?_oz.marj:0))
+        +'</div>';
+      var _prows=(_os.partiler||[]).map(function(p){var yz=p.adet>0?Math.round(p.satilan/p.adet*100):0;
+        return '<div class="row" style="flex-wrap:wrap;"><div class="grow" style="min-width:170px;"><div style="font-weight:700;" class="nowrap">'+esc(p.makine)+' ×'+p.adet+'</div><div style="font-size:11px;color:var(--muted);">'+esc(p.tarih||"")+' · birim maliyet '+money(p.birim)+'</div><div style="height:6px;border-radius:4px;background:var(--line);margin-top:7px;overflow:hidden;max-width:260px;"><div style="height:100%;width:'+yz+'%;background:linear-gradient(90deg,#7367F0,#9e95f5);border-radius:4px;"></div></div></div><div style="text-align:right;"><div style="font-size:12px;font-weight:800;color:#7367F0;">'+p.satilan+' satıldı</div><div style="font-size:11px;color:var(--muted);">kalan '+p.kalan+'</div></div></div>';
+      }).join('')||'<div class="empty">Parti yok (Purix siparişlerinden otomatik gelir).</div>';
+      var _srows=(_os.satislar||[]).map(function(x){
+        return '<div class="row" style="flex-wrap:wrap;gap:8px;"><div class="grow" style="min-width:150px;"><div style="font-weight:700;" class="nowrap">'+esc(x.musteri)+'</div><div style="font-size:11px;color:var(--muted);" class="nowrap">'+esc(x.tarih||"")+' · '+esc(x.makine)+' ×'+x.adet+(x.not?' · '+esc(x.not):'')+'</div></div>'
+        +'<div style="text-align:right;width:86px;flex:0 0 auto;"><div style="font-size:9px;color:var(--muted);">B.MALİYET</div><div class="mono" style="font-weight:700;">'+money(x.birimMaliyet)+'</div></div>'
+        +'<div style="text-align:right;width:86px;flex:0 0 auto;"><div style="font-size:9px;color:var(--muted);">B.SATIŞ</div><div class="mono" style="font-weight:700;">'+money(x.birimSatis)+'</div></div>'
+        +'<div style="text-align:right;width:96px;flex:0 0 auto;"><div style="font-size:9px;color:var(--muted);">KÂR</div><div class="mono" style="font-weight:800;color:'+(x.kar>=0?'#28C76F':'#EA5455')+';">'+(x.kar>=0?'+':'')+money(x.kar)+'</div></div>'
+        +durumPill(x.durum==="Tahsil edildi"?"Ödendi":"Bekliyor")
+        +'<button class="btn b-w" data-act="ortakSatisDuzenleAc" data-row="'+x._row+'" style="flex:0 0 auto;">'+ic('edit',12,'#E07B00')+'</button>'
+        +'<button class="btn b-w" data-act="ortakSatisSil" data-row="'+x._row+'" style="flex:0 0 auto;">'+ic('trash',12,'#EA5455')+'</button></div>';
+      }).join('')||'<div class="empty">Henüz 3. müşteriye satış girilmedi. "＋ Satış" ile başla.</div>';
+      var _stop=_osN?('<div class="row" style="background:var(--card2);"><div class="grow" style="font-weight:800;">TOPLAM</div><div class="mono" style="width:86px;text-align:right;font-weight:800;">'+money(_oz.satilanMaliyet||0)+'</div><div class="mono" style="width:86px;text-align:right;font-weight:800;">'+money(_oz.satisToplam||0)+'</div><div class="mono" style="width:96px;text-align:right;font-weight:800;color:#28C76F;">+'+money(_oz.kar||0)+'</div><div style="width:150px;"></div></div>'):'';
+      ortakInner=_kpi
+        +'<div style="padding:10px 15px 4px;font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--muted);">MAKİNE PARTİLERİ (Purix siparişlerinden otomatik)</div>'+_prows
+        +'<div style="padding:12px 15px 4px;font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--muted);border-top:1px solid var(--line);">3. MÜŞTERİYE SATIŞLAR</div>'+_srows+_stop
+        +'<div style="padding:10px 15px;font-size:10.5px;color:var(--muted);border-top:1px solid var(--line);">Bu bölüm ayrı defterde ("Ortak Satış" sayfası) tutulur — Purix carisine ve diğer hesaplara dokunmaz.</div>';
+    }
+    ortakAct='<button class="btn b-on" data-act="ortakSatisAc" style="padding:4px 10px;font-size:10.5px;flex:0 0 auto;">'+ic('plus',11,'#28C76F')+' Satış</button>';
+  }
   var SECARR=[
    {k:"karne",ic:"chart",col:"#FF3131",lbl:"Risk Karnesi",b:0,act:"",c:karneKart(e.karne)},
    {k:"portal",ic:"key",col:"#3B82F6",lbl:"Portal Girişi",b:0,act:"",c:portalInner},
@@ -727,6 +762,7 @@ function ekstreView(){
    {k:"ekstre",ic:"receipt",col:"#6E6B7B",lbl:"Ekstre",b:0,act:"",c:ekrows}
   ];
   if(_gf.faiz>0) SECARR.splice(2,0,{k:"faiz",ic:"alert",col:"#EA5455",lbl:"Gecikme",b:0,act:"",c:faizInner});
+  if(m===ORTAK_MUSTERI) SECARR.splice(6,0,{k:"ortak",ic:"trend",col:"#7367F0",lbl:"Ortak Satış",b:_osN,act:ortakAct,c:ortakInner});   /* V116: yalnız Purix */
   var _sel=SECARR.filter(function(x){return x.k===S.accSel;})[0]||SECARR.filter(function(x){return x.k==="tahsilatlar";})[0]||SECARR[0];
   var _grid='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:15px 6px;">'+SECARR.map(function(sx){var on=sx.k===_sel.k;return '<div data-act="accPick" data-k="'+sx.k+'" style="text-align:center;cursor:pointer;"><div style="position:relative;width:54px;height:54px;margin:0 auto;border-radius:15px;background:'+sx.col+';display:flex;align-items:center;justify-content:center;box-shadow:0 5px 13px '+hexA(sx.col,.3)+(on?(";outline:3px solid "+hexA(sx.col,.42)+";outline-offset:2px"):"")+';">'+ic(sx.ic,25,'#fff')+(sx.b>0?'<span style="position:absolute;top:-5px;right:-5px;min-width:19px;height:19px;border-radius:10px;background:#EA5455;color:#fff;font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid var(--bg);">'+sx.b+'</span>':'')+'</div><div style="font-size:11px;font-weight:600;margin-top:6px;color:'+(on?sx.col:'var(--head)')+';line-height:1.2;">'+sx.lbl+'</div></div>';}).join('')+'</div>';
   var _panel='<div class="box" style="padding:0;margin-top:14px;overflow:hidden;"><div style="display:flex;align-items:center;gap:11px;padding:12px 15px;border-bottom:1px solid var(--line);border-left:4px solid '+_sel.col+';">'+ic(_sel.ic,18,_sel.col)+'<span style="flex:1;font-size:12px;font-weight:800;letter-spacing:.4px;color:var(--head);">'+_sel.lbl.toLocaleUpperCase("tr")+'</span>'+(_sel.act||"")+'</div><div>'+_sel.c+'</div></div>';
@@ -1769,6 +1805,17 @@ function yapilacakView(){
   return html;
 }
 window.gumPhotos=[];
+/* V116 · ortak satış canlı kâr hesabı */
+window.ortakKar=function(){
+  var sel=$("os_parti"); var out=$("os_kar"); if(!sel||!out)return;
+  var op=sel.options[sel.selectedIndex]; if(!op){out.textContent="—";return;}
+  var birim=parseFloat(op.getAttribute("data-birim"))||0, kalan=parseInt(op.getAttribute("data-kalan"),10)||0;
+  var adet=parseInt(($("os_adet")||{}).value,10)||0, bs=parseFloat(String(($("os_bs")||{}).value||"").replace(",","."))||0;
+  if(!(adet>0)||!(bs>0)){out.textContent="—";out.style.color="#1a9e55";return;}
+  var kar=Math.round(adet*(bs-birim)*100)/100;
+  out.textContent=adet+" × ("+money(bs)+" − "+money(birim)+") = "+(kar>=0?"+":"")+money(kar)+(adet>kalan?"  ⚠ stok "+kalan:"");
+  out.style.color=(adet>kalan)?"#EA5455":(kar>=0?"#1a9e55":"#EA5455");
+};
 window.senaOdemeCalc=function(){ var t=parseFloat(String((($("so_tut")||{}).value)||"").replace(",","."))||0; var _sc=(S.data&&S.data.senaCari)||{}; var bak=_sc.guncelBakiye||0; var el=$("so_kalan"); if(el)el.innerHTML='<span style="text-decoration:line-through;color:var(--muted);font-weight:600;font-size:12px;">'+money(bak,"₺")+'</span> → '+money(Math.round((bak-t)*100)/100,"₺"); };
 function odemeStripHtml(){ var h=""; (window.gumPhotos||[]).forEach(function(gd,gi){ var pdf=/^data:application\/pdf/i.test(gd); h+='<div style="position:relative;width:64px;height:64px;border-radius:11px;border:1px solid var(--line);overflow:hidden;flex:0 0 auto;">'+(pdf?'<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fdeaea;color:#FF3131;font-size:9px;font-weight:800;">PDF</div>':'<div style="width:100%;height:100%;background-size:cover;background-position:center;background-image:url('+gd+')"></div>')+'<span data-act="odemeDocDel" data-i="'+gi+'" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(255,49,49,.92);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;cursor:pointer;">×</span></div>'; }); h+='<label for="so_file" style="width:64px;height:64px;border:1.5px dashed var(--line);border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--muted);cursor:pointer;">'+ic("plus",18,"#8A8A8A")+'<span style="font-size:8.5px;">Ekle</span></label>'; return h; }
 function rebuildOdemeStrip(){ var s=$("so_strip"); if(s)s.innerHTML=odemeStripHtml(); }
@@ -2072,6 +2119,23 @@ function sheetOvl(){
      +'<label class="lbl">Açılış Şifresi (müşteri bunu görecek)</label><input id="sf_txt" class="field" value="'+esc(x.sifre||"")+'" placeholder="Örn: 4729-AB">'
      +'<button class="btnred" data-act="sifreKaydet" data-row="'+x.row+'" style="margin-top:14px;" '+(S.busy?'disabled':'')+'>'+ic('key',16,'#fff')+' Şifreyi Gönder (Verildi)</button>'
      +'<button class="btn b-no" data-act="sifreReddet" data-row="'+x.row+'" style="width:100%;justify-content:center;padding:11px;margin-top:8px;">'+ic('x',14,'#EA5455')+' Reddet</button></div></div>';
+  }
+  if(S.sheet==="ortakSatisForm"){   /* V116 · Purix ortak satış ekle/düzenle */
+    const od=S.sheetData||{}; const oed=!!od.edit;
+    const _osd=(S.data&&S.data.ortakSatis)||{}; const _pl=(_osd.partiler||[]);
+    const _today=new Date().toISOString().slice(0,10);
+    const _popts=_pl.map(function(p){ var kal=p.kalan+(oed&&od.oid===p.oid?Number(od.adet||0):0);
+      return '<option value="'+esc(p.oid)+'" data-birim="'+p.birim+'" data-kalan="'+kal+'"'+(od.oid===p.oid?' selected':'')+((kal<=0&&od.oid!==p.oid)?' disabled':'')+'>'+esc(p.makine)+' ×'+p.adet+' · '+esc(p.tarih||"")+' · maliyet '+money(p.birim)+' · kalan '+kal+'</option>'; }).join('');
+    return '<div class="ovl"><div class="modal" data-stop="1"><div class="mh"><div class="t">'+(oed?'Ortak Satış Düzenle':'Ortak Satış Ekle')+' · Purix</div><div style="cursor:pointer;" data-act="sheetclose">'+ic('x',20,'#999')+'</div></div>'
+     +'<label class="lbl">Makine Partisi (maliyet otomatik)</label><select id="os_parti" class="field" onchange="ortakKar()" '+(oed?'disabled':'')+'>'+_popts+'</select>'
+     +'<label class="lbl">Satılan Müşteri (3. taraf)</label><input id="os_mus" class="field" placeholder="Örn. Kuyumcu Altınbaş A.Ş." value="'+esc(od.musteri||"")+'">'
+     +'<div class="two"><div><label class="lbl">Adet</label><input id="os_adet" class="field" type="number" inputmode="numeric" value="'+esc(od.adet||"1")+'" oninput="ortakKar()"></div>'
+     +'<div><label class="lbl">Birim Satış Fiyatı ($)</label><input id="os_bs" class="field" type="number" inputmode="decimal" value="'+esc(od.birimSatis||"")+'" placeholder="0" oninput="ortakKar()"></div></div>'
+     +'<div class="two"><div><label class="lbl">Tarih</label><input id="os_tar" class="field" type="date" value="'+esc(od.tarih||_today)+'"></div>'
+     +'<div><label class="lbl">Durum</label><select id="os_dur" class="field"><option'+(od.durum==="Bekliyor"?' selected':'')+'>Bekliyor</option><option'+(od.durum==="Tahsil edildi"?' selected':'')+'>Tahsil edildi</option></select></div></div>'
+     +'<label class="lbl">Not (isteğe bağlı)</label><input id="os_not" class="field" value="'+esc(od.not||"")+'">'
+     +'<div style="background:rgba(40,199,111,.09);border:1px solid rgba(40,199,111,.35);border-radius:11px;padding:11px 14px;margin-top:13px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10.5px;font-weight:800;color:#1a9e55;letter-spacing:.3px;">OTOMATİK KÂR</span><span id="os_kar" class="mono" style="font-weight:800;color:#1a9e55;font-size:16px;">—</span></div>'
+     +'<button class="btnred" data-act="ortakSatisKaydet" '+(oed?'data-row="'+esc(od.row)+'" ':'')+(S.busy?'disabled':'')+' style="margin-top:14px;">'+ic('check',15,'#fff')+' '+(oed?'Değişiklikleri Kaydet':'Satışı Kaydet')+'</button></div></div>';
   }
   if(S.sheet==="siparisEkle"){
     const sd=S.sheetData||{}; const edit=!!sd.edit;
@@ -2511,6 +2575,22 @@ document.addEventListener("click",async e=>{
   if(a==="sifreYanitAc"){const i=+el.getAttribute("data-i");const t=((S.data||{}).sifreler||[])[i]||{};S.sheet="sifreYanit";S.sheetData={row:t._row,musteri:t.musteri,makine:t.makine,sifre:t.sifre};render();return;}
   if(a==="sifreKaydet"){const txt=$("sf_txt").value;if(!txt.trim()){toast("Şifre yazın");return;}const row=el.getAttribute("data-row");S.sheet=null;S.sheetData=null;act("sifreYanitla",{row:row,msifre:txt,durum:"Verildi"},"Şifre gönderildi");return;}
   if(a==="sifreReddet"){const row=el.getAttribute("data-row");S.sheet=null;S.sheetData=null;act("sifreYanitla",{row:row,durum:"Reddedildi"},"Reddedildi");return;}
+  /* V116 · ortak satış (yalnız Purix kartından açılır) */
+  if(a==="ortakSatisAc"){S.sheet="ortakSatisForm";S.sheetData={};render();setTimeout(function(){try{ortakKar();}catch(e){}},50);return;}
+  if(a==="ortakSatisDuzenleAc"){const row=el.getAttribute("data-row");const _o=(((S.data&&S.data.ortakSatis)||{}).satislar||[]).find(function(x){return String(x._row)===String(row);});if(!_o){toast("Satış bulunamadı");return;}S.sheet="ortakSatisForm";var _tf=String(_o.tarih||"");var _tm=_tf.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);if(_tm)_tf=_tm[3]+"-"+("0"+_tm[2]).slice(-2)+"-"+("0"+_tm[1]).slice(-2);S.sheetData={edit:true,row:row,oid:_o.oid,musteri:_o.musteri,adet:String(_o.adet),birimSatis:String(_o.birimSatis),tarih:_tf,durum:_o.durum,not:_o.not};render();setTimeout(function(){try{ortakKar();}catch(e){}},50);return;}
+  if(a==="ortakSatisKaydet"){
+    const _sel=$("os_parti");const _oid=_sel?_sel.value:"";const _mus2=($("os_mus")||{}).value.trim();
+    const _ad2=parseInt(($("os_adet")||{}).value,10)||0;const _bs2=parseFloat(String(($("os_bs")||{}).value||"").replace(",","."))||0;
+    if(!_oid){toast("Makine partisi seç");return;}
+    if(!_mus2){toast("Satılan müşteri gerekli");return;}
+    if(!(_ad2>0)){toast("Adet gerekli");return;}
+    if(!(_bs2>0)){toast("Birim satış fiyatı gerekli");return;}
+    const _op2=_sel.options[_sel.selectedIndex];const _kal2=parseInt(_op2.getAttribute("data-kalan"),10)||0;
+    if(_ad2>_kal2){toast("Stok yetersiz — bu partide kalan: "+_kal2);return;}
+    const _od2={oid:_oid,musteri:_mus2,adet:_ad2,birimSatis:_bs2,tarih:($("os_tar")||{}).value||"",durum:($("os_dur")||{}).value||"Bekliyor",not:($("os_not")||{}).value||""};
+    const _row2=el.getAttribute("data-row");S.sheet=null;S.sheetData=null;
+    if(_row2)act("ortakSatisGuncelle",{row:_row2,data:_od2},"Satış güncellendi ✓");else act("ortakSatisEkle",{data:_od2},"Satış kaydedildi · kâr otomatik hesaplandı ✓");return;}
+  if(a==="ortakSatisSil"){const row=el.getAttribute("data-row");if(!confirm("Bu ortak satış kaydı silinsin mi? (stok geri yüklenir)"))return;act("ortakSatisSil",{row:row},"Satış silindi");return;}
   if(a==="siparisEkleAc"){window.sipPhotos=[];S.sheet="siparisEkle";S.sheetData={musteri:el.getAttribute("data-musteri")||""};render();return;}
   if(a==="siparisKaydet"){const data={musteri:$("sp_mus").value.trim(),makine:$("sp_mak").value.trim(),adet:($("sp_adet").value+" "+(($("sp_olcu")||{}).value||"adet")),birim:$("sp_birim").value,pb:$("sp_pb").value,kdv:$("sp_kdv").checked,tarih:$("sp_tar").value,durum:$("sp_durum").value,not:$("sp_not").value,fatura:($("sp_fatura")?$("sp_fatura").checked:false),hediye:($("sp_hediye")?$("sp_hediye").checked:false),photos:(window.sipPhotos||[]).slice()};if(!data.musteri||!data.makine){toast("Müşteri ve makine gerekli");return;}S.sheet=null;S.sheetData=null;window.sipPhotos=[];act("siparisEkle",{data:data},"Sipariş oluşturuldu");return;}
   if(a==="siparisDuzenleAc"){window.sipPhotos=[];const row=el.getAttribute("data-row");const o=((S.data&&S.data.siparisler)||[]).find(x=>String(x._row)===String(row));if(!o){toast("Sipariş bulunamadı");return;}S.sheet="siparisEkle";S.sheetData={edit:true,row:row,musteri:o.musteri,makine:o.makine,adet:o.adet,birim:o.birim,pb:o.pb,tarih:o.tarih,durum:o.durum,not:o.not,kdv:o.kdv,faturali:o.faturali,hediye:o.hediye,foto:o.foto};render();return;}
